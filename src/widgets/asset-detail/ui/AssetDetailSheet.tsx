@@ -59,7 +59,7 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 				transition={{ duration: 0.25, ease: EASE_OUT_QUART }}
 			/>
 			<motion.div
-				className="relative w-full max-w-2xl bg-[#0a0a0f] border-l border-[#1e1e2e] overflow-y-auto"
+				className="relative w-[90vw] max-w-2xl bg-[#0a0a0f] border-l border-[#1e1e2e] overflow-y-auto"
 				initial={shouldReduceMotion ? false : { x: "100%" }}
 				animate={{ x: 0 }}
 				exit={{ x: "100%" }}
@@ -82,11 +82,11 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 				<div className="p-4 space-y-6">
 					{/* Price */}
 					<div>
-						<div className="flex items-baseline gap-3">
-							<span className="text-3xl font-semibold tabular-nums text-zinc-100">
+						<div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+							<span className="text-2xl md:text-3xl font-semibold tabular-nums text-zinc-100">
 								{price > 0 ? formatPrice(price, currency) : "---"}
 							</span>
-							<span className={`text-lg tabular-nums ${changePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+							<span className={`text-base md:text-lg tabular-nums ${changePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}>
 								{price > 0 ? `${formatPrice(change, currency)} (${formatPercent(changePercent)})` : ""}
 							</span>
 						</div>

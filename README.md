@@ -5,7 +5,7 @@
 > [!NOTE]
 > This is an experimental project, meant to explore the idea and is not production-ready.
 
-A market-watching hub I'm building (for myself at the moment).
+A market-watching hub I'm building for personal use.
 
 It's designed for tracking stocks, ETFs, crypto and other assets in a clean UI. Envisioned to support customizable extras like live financial channel feeds with plans for keyword tracking, automated AI reports, and whatever else can help me navigate the markets. Built for my spare desktop screen so I can display it for a few hours at a time.
 

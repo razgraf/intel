@@ -92,7 +92,11 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
   }, [livelineData, timeframe]);
 
   return (
-    <div className="rounded-xl border border-[#1e1e2e] bg-[#111118] p-3 flex flex-col gap-2" onDoubleClick={onOpenDetail}>
+    <div className="rounded-xl border border-[#1e1e2e] bg-[#111118] p-3 flex flex-col gap-2 md:cursor-pointer" onDoubleClick={(e) => {
+      // Skip double-click on touch/mobile — users have explicit buttons instead
+      if (window.matchMedia("(pointer: coarse)").matches) return;
+      onOpenDetail?.();
+    }}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
