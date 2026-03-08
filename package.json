@@ -1,0 +1,46 @@
+{
+  "author": {
+    "name": "razgraf",
+    "url": "https://github.com/razgraf"
+  },
+  "repository": {
+    "url": "https://github.com/razgraf/intel"
+  },
+  "name": "intel",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3100 --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check ./src",
+    "format": "biome check --write ./src"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5",
+    "bloom-menu": "^0.1.0",
+    "framer-motion": "^12",
+    "liveline": "^0.0.6",
+    "lucide-react": "^0.487",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "yahoo-finance2": "^3",
+    "zustand": "^5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "agentation": "^2.2.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "trustedDependencies": [
+    "sharp",
+    "unrs-resolver",
+    "@biomejs/biome"
+  ]
+}
