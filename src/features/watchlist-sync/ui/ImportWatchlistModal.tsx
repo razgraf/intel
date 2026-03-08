@@ -1,0 +1,149 @@
+"use client";
+
+import { useWatchlistStore } from "@/entities/watchlist/model/store";
+import type { WatchlistItem } from "@/entities/watchlist/model/types";
+import { Dialog } from "@/shared/ui/Dialog";
+import { AlertTriangle, Check } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { decodeWatchlist } from "../lib/encode";
+
+interface ValidatedItem {
+  item: WatchlistItem;
+  valid: boolean;
+}
+
+export function ImportWatchlistModal() {
+  const [items, setItems] = useState<ValidatedItem[] | null>(null);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const reorder = useWatchlistStore((s) => s.reorder);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payload = params.get("watchlist");
+    if (!payload) return;
+
+    const decoded = decodeWatchlist(payload);
+    if (!decoded || decoded.length === 0) {
+      clearParam();
+      return;
+    }
+
+    setLoading(true);
+    setOpen(true);
+
+    const quotable = decoded.filter((i) => i.type !== "Embed");
+    const tickers = quotable.map((i) => i.ticker).join(",");
+
+    const validate = tickers
+      ? fetch(`/api/market/quote?symbols=${encodeURIComponent(tickers)}`)
+          .then((res) => res.json())
+          .then((data: Array<{ symbol: string }>) =>
+            new Set(Array.isArray(data) ? data.map((q) => q.symbol) : []),
+          )
+          .catch(() => new Set<string>(quotable.map((i) => i.ticker)))
+      : Promise.resolve(new Set<string>());
+
+    validate
+      .then((found) => {
+        const validated: ValidatedItem[] = decoded.map((item) => ({
+          item,
+          valid: item.type === "Embed" || found.has(item.ticker),
+        }));
+        setItems(validated);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const clearParam = useCallback(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("watchlist");
+    history.replaceState(null, "", url.pathname + url.search);
+  }, []);
+
+  const handleRestore = useCallback(() => {
+    if (!items) return;
+    const valid = items.filter((i) => i.valid).map((i) => i.item);
+    reorder(valid);
+    clearParam();
+    setOpen(false);
+  }, [items, reorder, clearParam]);
+
+  const handleCancel = useCallback(() => {
+    clearParam();
+    setOpen(false);
+  }, [clearParam]);
+
+  const validCount = items?.filter((i) => i.valid).length ?? 0;
+
+  return (
+    <Dialog open={open} onClose={handleCancel}>
+      <div className="p-5">
+        <h2 className="text-sm font-semibold text-zinc-100 mb-2">
+          Restore Watchlist
+        </h2>
+        <p className="text-xs text-zinc-400 mb-4">
+          You&apos;re trying to restore a watchlist from a link. This will
+          override any existing items you&apos;re tracking on this browser.
+        </p>
+
+        {loading ? (
+          <div className="text-xs text-zinc-500 py-4 text-center">
+            Validating tickers...
+          </div>
+        ) : (
+          items && (
+            <div className="space-y-1 mb-4 max-h-48 overflow-y-auto">
+              {items.map(({ item, valid }) => (
+                <div
+                  key={item.ticker}
+                  className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs ${
+                    valid
+                      ? "bg-zinc-800/50 text-zinc-200"
+                      : "bg-red-500/10 text-red-400"
+                  }`}
+                >
+                  {valid ? (
+                    <Check className="h-3 w-3 text-emerald-400 shrink-0" />
+                  ) : (
+                    <AlertTriangle className="h-3 w-3 text-red-400 shrink-0" />
+                  )}
+                  <span className="font-medium">{item.ticker}</span>
+                  {item.label && item.label !== item.ticker && (
+                    <span className="text-zinc-500">{item.label}</span>
+                  )}
+                  {item.type && (
+                    <span className="ml-auto text-[10px] text-zinc-600">
+                      {item.type}
+                    </span>
+                  )}
+                  {!valid && (
+                    <span className="ml-auto text-[10px]">Not found</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )
+        )}
+
+        <div className="flex gap-2 justify-end">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="px-3 py-1.5 text-xs rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleRestore}
+            disabled={loading || validCount === 0}
+            className="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Restore ({validCount})
+          </button>
+        </div>
+      </div>
+    </Dialog>
+  );
+}

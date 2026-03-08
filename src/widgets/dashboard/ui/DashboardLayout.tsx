@@ -1,7 +1,11 @@
 "use client";
 
+import { useWatchlistStore } from "@/entities/watchlist/model/store";
+import { encodeWatchlist } from "@/features/watchlist-sync/lib/encode";
+import { ImportWatchlistModal } from "@/features/watchlist-sync/ui/ImportWatchlistModal";
 import { EXCHANGES, getExchangeStatus } from "@/shared/lib/exchanges";
 import { formatLocalTime, getLocalTimezone } from "@/shared/lib/format";
+import { Dialog } from "@/shared/ui/Dialog";
 import { AssetGrid } from "@/widgets/asset-grid/ui/AssetGrid";
 import { AssetDetailSheet } from "@/widgets/asset-detail/ui/AssetDetailSheet";
 import { EarningsPanel } from "@/widgets/earnings/ui/EarningsPanel";
@@ -9,15 +13,18 @@ import { MarketHoursPanel } from "@/widgets/market-hours/ui/MarketHoursPanel";
 import { WatchlistPanel } from "@/widgets/watchlist/ui/WatchlistPanel";
 import { TipsPanel } from "@/widgets/tips/ui/TipsPanel";
 import { AnimatePresence, motion } from "framer-motion";
-import { PanelRight } from "lucide-react";
+import { Check, Copy, PanelRight, Settings } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export function DashboardLayout() {
   const [selectedTicker, setSelectedTicker] = useState<string | undefined>();
   const [detailTicker, setDetailTicker] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [localTime, setLocalTime] = useState("");
   const [timezone, setTimezone] = useState("");
+  const watchlistItems = useWatchlistStore((s) => s.items);
 
   useEffect(() => {
     setLocalTime(formatLocalTime(new Date()));
@@ -30,6 +37,15 @@ export function DashboardLayout() {
   }, []);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+
+  const handleExport = useCallback(() => {
+    const payload = encodeWatchlist(watchlistItems);
+    const url = `${window.location.origin}${window.location.pathname}?watchlist=${payload}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [watchlistItems]);
 
   useEffect(() => {
     function handleEscape(e: KeyboardEvent) {
@@ -60,7 +76,15 @@ export function DashboardLayout() {
           <span>{timezone}</span>
           <button
             type="button"
-            className="md:hidden ml-1 p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+            className="ml-1 p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            className="md:hidden p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
             onClick={() => setSidebarOpen((o) => !o)}
             aria-label="Toggle sidebar"
           >
@@ -123,6 +147,36 @@ export function DashboardLayout() {
           />
         )}
       </AnimatePresence>
+
+      {/* Settings dialog */}
+      <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+        <div className="p-5">
+          <h2 className="text-sm font-semibold text-zinc-100 mb-4">Settings</h2>
+          <button
+            type="button"
+            onClick={handleExport}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
+          >
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-emerald-400" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" />
+                Export Watchlist
+              </>
+            )}
+          </button>
+          <p className="text-[10px] text-zinc-600 mt-2 text-center">
+            Copies a shareable link to your clipboard
+          </p>
+        </div>
+      </Dialog>
+
+      {/* Import from URL */}
+      <ImportWatchlistModal />
     </div>
   );
 }

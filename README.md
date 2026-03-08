@@ -20,11 +20,12 @@ It's designed for tracking stocks, ETFs, crypto and other assets in a clean UI. 
 - **Market hours tracker** — live open/close status for NYSE, CME, LSE, BVB, NIKKEI, Crypto with countdown timers
 - **Embeddable special items** — add live YouTube feeds (e.g. Bloomberg Live) directly to the grid
 - **Multi-exchange awareness** — tracks 6 exchanges across US, EU, and Asia with timezone-aware status
+- **Watchlist sync** — export your watchlist as a shareable URL, import it on another device via confirmation modal
 - **Tips slideshow** — rotating tips in the sidebar for discoverability
 
-| Details                            | Settings (e.g. add futures ticker)  |
-| ---------------------------------- | ----------------------------------- |
-| ![Details](/assets/ss-details.png) | ![Details](/assets/ss-settings.png) |
+| Details                            | Settings (e.g. add futures ticker)   | Import / Export watchlist          |
+| ---------------------------------- | ------------------------------------ | ---------------------------------- |
+| ![Details](/assets/ss-details.png) | ![Settings](/assets/ss-settings.png) | ![Restore](/assets/ss-restore.png) |
 
 ## Tech Stack
 

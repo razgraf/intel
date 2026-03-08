@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useEffect, type ReactNode } from "react";
 
 interface DialogProps {
 	open: boolean;
@@ -8,8 +9,12 @@ interface DialogProps {
 	children: ReactNode;
 }
 
+const DURATION = 0.2;
+const EXIT_DURATION = DURATION * 0.8;
+const EASING: [number, number, number, number] = [0.23, 1, 0.32, 1]; // ease-out-quint
+
 export function Dialog({ open, onClose, children }: DialogProps) {
-	const overlayRef = useRef<HTMLDivElement>(null);
+	const shouldReduceMotion = useReducedMotion();
 
 	useEffect(() => {
 		if (!open) return;
@@ -20,19 +25,45 @@ export function Dialog({ open, onClose, children }: DialogProps) {
 		return () => document.removeEventListener("keydown", onKey);
 	}, [open, onClose]);
 
-	if (!open) return null;
-
 	return (
-		<div
-			ref={overlayRef}
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-			onClick={(e) => {
-				if (e.target === overlayRef.current) onClose();
-			}}
-		>
-			<div className="w-full max-w-sm rounded-xl border border-[#1e1e2e] bg-[#111118] shadow-2xl">
-				{children}
-			</div>
-		</div>
+		<AnimatePresence>
+			{open && (
+				<motion.div
+					className="fixed inset-0 z-50 flex items-center justify-center"
+					initial={shouldReduceMotion ? false : { opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					transition={{
+						duration: shouldReduceMotion ? 0 : EXIT_DURATION,
+						ease: EASING,
+					}}
+				>
+					{/* Overlay */}
+					<div
+						className="absolute inset-0 bg-black/60"
+						onClick={onClose}
+					/>
+
+					{/* Content */}
+					<motion.div
+						className="relative w-full max-w-sm rounded-xl border border-[#1e1e2e] bg-[#111118] shadow-2xl"
+						initial={
+							shouldReduceMotion
+								? false
+								: { opacity: 0, scale: 0.95, y: 10 }
+						}
+						animate={{ opacity: 1, scale: 1, y: 0 }}
+						exit={{ opacity: 0, scale: 0.95, y: 10 }}
+						transition={{
+							duration: shouldReduceMotion ? 0 : DURATION,
+							ease: EASING,
+						}}
+						style={{ willChange: "transform, opacity" }}
+					>
+						{children}
+					</motion.div>
+				</motion.div>
+			)}
+		</AnimatePresence>
 	);
 }
