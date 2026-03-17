@@ -11,6 +11,7 @@ import { GripVertical, X } from "lucide-react";
 interface WatchlistRowProps {
 	item: WatchlistItem;
 	quote?: Quote;
+	deribitPrice?: number;
 	isSelected?: boolean;
 	onClick?: () => void;
 	onOpenDetail?: () => void;
@@ -19,15 +20,17 @@ interface WatchlistRowProps {
 export function WatchlistRow({
 	item,
 	quote,
+	deribitPrice,
 	isSelected,
 	onClick,
 	onOpenDetail,
 }: WatchlistRowProps) {
 	const remove = useWatchlistStore((s) => s.remove);
 	const dragControls = useDragControls();
-	const price = quote?.regularMarketPrice ?? 0;
-	const changePercent = quote?.regularMarketChangePercent ?? 0;
-	const isOpen = quote?.marketState === "REGULAR";
+	const isDeribit = item.source === "deribit";
+	const price = isDeribit ? (deribitPrice ?? 0) : (quote?.regularMarketPrice ?? 0);
+	const changePercent = isDeribit ? 0 : (quote?.regularMarketChangePercent ?? 0);
+	const isOpen = isDeribit || quote?.marketState === "REGULAR";
 
 	return (
 		<Reorder.Item
@@ -44,10 +47,7 @@ export function WatchlistRow({
 			role="button"
 			tabIndex={0}
 		>
-			<div
-				className="shrink-0 cursor-grab touch-none"
-				onPointerDown={(e) => dragControls.start(e)}
-			>
+			<div className="shrink-0 cursor-grab touch-none" onPointerDown={(e) => dragControls.start(e)}>
 				<GripVertical className="h-3 w-3 text-zinc-600" />
 			</div>
 			{item.type === "Embed" ? (
@@ -65,7 +65,7 @@ export function WatchlistRow({
 					/>
 					<span className="text-xs font-medium text-zinc-200 w-16 truncate">{item.ticker}</span>
 					<span className="text-xs tabular-nums text-zinc-300 flex-1 text-right">
-						{price > 0 ? formatPrice(price, quote?.currency) : "---"}
+						{price > 0 ? formatPrice(price, isDeribit ? "USD" : quote?.currency) : "---"}
 					</span>
 					<span
 						className={`text-[11px] tabular-nums w-14 text-right ${

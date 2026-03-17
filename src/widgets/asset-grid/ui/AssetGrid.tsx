@@ -25,7 +25,11 @@ export function AssetGrid({ onOpenDetail }: AssetGridProps) {
 				item.type === "Embed" ? (
 					<EmbedCard key={item.ticker} item={item} />
 				) : (
-					<AssetCard key={item.ticker} item={item} onOpenDetail={() => onOpenDetail?.(item.ticker)} />
+					<AssetCard
+						key={item.ticker}
+						item={item}
+						onOpenDetail={() => onOpenDetail?.(item.ticker)}
+					/>
 				),
 			)}
 		</div>

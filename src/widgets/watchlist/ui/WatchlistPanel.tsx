@@ -1,5 +1,6 @@
 "use client";
 
+import { useDeribitQuotes } from "@/entities/asset/api/deribit-queries";
 import { useQuotes } from "@/entities/asset/api/queries";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { TickerSearchInput } from "@/features/ticker-search/ui/TickerSearchInput";
@@ -16,9 +17,15 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 	const items = useWatchlistStore((s) => s.items);
 	const add = useWatchlistStore((s) => s.add);
 	const reorder = useWatchlistStore((s) => s.reorder);
-	const tickers = items.map((i) => i.ticker);
-	const { data: quotes = [] } = useQuotes(tickers);
+
+	const yahooTickers = items.filter((i) => i.source !== "deribit").map((i) => i.ticker);
+	const deribitTickers = items.filter((i) => i.source === "deribit").map((i) => i.ticker);
+
+	const { data: quotes = [] } = useQuotes(yahooTickers);
+	const { data: deribitQuotes = [] } = useDeribitQuotes(deribitTickers);
+
 	const quoteMap = new Map(quotes.map((q) => [q.symbol, q]));
+	const deribitQuoteMap = new Map(deribitQuotes.map((q) => [q.symbol, q]));
 
 	return (
 		<div className="flex flex-col h-full">
@@ -43,6 +50,7 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 								key={item.ticker}
 								item={item}
 								quote={quoteMap.get(item.ticker)}
+								deribitPrice={deribitQuoteMap.get(item.ticker)?.markPrice}
 								isSelected={selectedTicker === item.ticker}
 								onClick={() => onSelect?.(item.ticker)}
 								onOpenDetail={() => onOpenDetail?.(item.ticker)}

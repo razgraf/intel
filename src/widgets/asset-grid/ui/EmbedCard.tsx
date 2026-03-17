@@ -34,9 +34,7 @@ export function EmbedCard({ item }: EmbedCardProps) {
 				>
 					Embed
 				</span>
-				<span className="text-sm font-semibold text-zinc-100">
-					{item.label ?? item.ticker}
-				</span>
+				<span className="text-sm font-semibold text-zinc-100">{item.label ?? item.ticker}</span>
 			</div>
 
 			{/* Body */}

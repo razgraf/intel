@@ -1,5 +1,6 @@
 "use client";
 
+import { useDeribitQuotes } from "@/entities/asset/api/deribit-queries";
 import { useOptions, useQuotes } from "@/entities/asset/api/queries";
 import { inferAssetType } from "@/entities/asset/model/types";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
@@ -19,17 +20,22 @@ interface AssetDetailSheetProps {
 export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 	const shouldReduceMotion = useReducedMotion();
 	const item = useWatchlistStore((s) => s.items.find((i) => i.ticker === ticker));
+	const isDeribit = item?.source === "deribit";
+
 	const allTickers = [ticker, item?.futuresTicker].filter(Boolean) as string[];
-	const { data: quotes = [] } = useQuotes(allTickers);
-	const { data: optionsData } = useOptions(ticker);
+	const { data: quotes = [] } = useQuotes(isDeribit ? [] : allTickers);
+	const { data: optionsData } = useOptions(isDeribit ? undefined : ticker);
+	const { data: deribitQuotes = [] } = useDeribitQuotes(isDeribit ? [ticker] : []);
 
 	const spotQuote = quotes.find((q) => q.symbol === ticker);
-	const futuresQuote = item?.futuresTicker ? quotes.find((q) => q.symbol === item.futuresTicker) : null;
+	const futuresQuote =
+		!isDeribit && item?.futuresTicker ? quotes.find((q) => q.symbol === item.futuresTicker) : null;
+	const deribitQuote = isDeribit ? deribitQuotes.find((q) => q.symbol === ticker) : null;
 
-	const price = spotQuote?.regularMarketPrice ?? 0;
-	const change = spotQuote?.regularMarketChange ?? 0;
-	const changePercent = spotQuote?.regularMarketChangePercent ?? 0;
-	const currency = spotQuote?.currency ?? item?.currency ?? "USD";
+	const price = isDeribit ? (deribitQuote?.markPrice ?? 0) : (spotQuote?.regularMarketPrice ?? 0);
+	const change = isDeribit ? 0 : (spotQuote?.regularMarketChange ?? 0);
+	const changePercent = isDeribit ? 0 : (spotQuote?.regularMarketChangePercent ?? 0);
+	const currency = isDeribit ? "USD" : (spotQuote?.currency ?? item?.currency ?? "USD");
 	const type = item?.type ?? inferAssetType(spotQuote?.quoteType ?? "");
 
 	// Average IV from first 5 ATM calls
@@ -74,7 +80,11 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 							<span className="text-sm text-zinc-500">{spotQuote.shortName}</span>
 						)}
 					</div>
-					<button type="button" onClick={onClose} className="rounded-lg p-1 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800">
+					<button
+						type="button"
+						onClick={onClose}
+						className="rounded-lg p-1 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+					>
 						<X className="h-5 w-5" />
 					</button>
 				</div>
@@ -86,39 +96,86 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 							<span className="text-2xl md:text-3xl font-semibold tabular-nums text-zinc-100">
 								{price > 0 ? formatPrice(price, currency) : "---"}
 							</span>
-							<span className={`text-base md:text-lg tabular-nums ${changePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-								{price > 0 ? `${formatPrice(change, currency)} (${formatPercent(changePercent)})` : ""}
-							</span>
+							{!isDeribit && (
+								<span
+									className={`text-base md:text-lg tabular-nums ${changePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}
+								>
+									{price > 0
+										? `${formatPrice(change, currency)} (${formatPercent(changePercent)})`
+										: ""}
+								</span>
+							)}
 						</div>
 					</div>
 
 					{/* Chart */}
-					<AssetDetailChart ticker={ticker} currency={currency} changePercent={changePercent} spotPrice={price} />
+					<AssetDetailChart
+						ticker={ticker}
+						currency={currency}
+						changePercent={changePercent}
+						spotPrice={price}
+						source={item?.source}
+					/>
 
 					{/* Stats grid */}
 					<div className="grid grid-cols-2 gap-3">
-						<StatRow label="Open" value={spotQuote?.regularMarketOpen} currency={currency} />
-						<StatRow label="Prev Close" value={spotQuote?.regularMarketPreviousClose} currency={currency} />
-						<StatRow label="Day High" value={spotQuote?.regularMarketDayHigh} currency={currency} />
-						<StatRow label="Day Low" value={spotQuote?.regularMarketDayLow} currency={currency} />
-						<StatRow label="Volume" value={spotQuote?.regularMarketVolume} isVolume />
-						{futuresQuote && (
-							<StatRow label={`Futures (${item?.futuresTicker})`} value={futuresQuote.regularMarketPrice} currency={futuresQuote.currency} />
-						)}
-						{avgIV !== null && (
-							<div className="rounded-lg bg-[#111118] p-3">
-								<span className="text-[11px] text-zinc-500 block">Avg IV (ATM)</span>
-								<span className="text-sm tabular-nums text-zinc-200">{(avgIV * 100).toFixed(1)}%</span>
-							</div>
+						{isDeribit ? (
+							<>
+								{deribitQuote && (
+									<>
+										<StatRow label="Bid" value={deribitQuote.bestBid} currency="USD" />
+										<StatRow label="Ask" value={deribitQuote.bestAsk} currency="USD" />
+										<div className="rounded-lg bg-[#111118] p-3">
+											<span className="text-[11px] text-zinc-500 block">IV</span>
+											<span className="text-sm tabular-nums text-zinc-200">
+												{deribitQuote.markIV.toFixed(1)}%
+											</span>
+										</div>
+									</>
+								)}
+							</>
+						) : (
+							<>
+								<StatRow label="Open" value={spotQuote?.regularMarketOpen} currency={currency} />
+								<StatRow
+									label="Prev Close"
+									value={spotQuote?.regularMarketPreviousClose}
+									currency={currency}
+								/>
+								<StatRow
+									label="Day High"
+									value={spotQuote?.regularMarketDayHigh}
+									currency={currency}
+								/>
+								<StatRow
+									label="Day Low"
+									value={spotQuote?.regularMarketDayLow}
+									currency={currency}
+								/>
+								<StatRow label="Volume" value={spotQuote?.regularMarketVolume} isVolume />
+								{futuresQuote && (
+									<StatRow
+										label={`Futures (${item?.futuresTicker})`}
+										value={futuresQuote.regularMarketPrice}
+										currency={futuresQuote.currency}
+									/>
+								)}
+								{avgIV !== null && (
+									<div className="rounded-lg bg-[#111118] p-3">
+										<span className="text-[11px] text-zinc-500 block">Avg IV (ATM)</span>
+										<span className="text-sm tabular-nums text-zinc-200">
+											{(avgIV * 100).toFixed(1)}%
+										</span>
+									</div>
+								)}
+							</>
 						)}
 					</div>
 
 					{/* Links */}
 					<div className="flex items-center justify-between pt-2 border-t border-[#1e1e2e]">
-						<ExternalLinks ticker={ticker} />
-						{item?.notes && (
-							<p className="text-xs text-zinc-500 italic">{item.notes}</p>
-						)}
+						<ExternalLinks ticker={ticker} source={item?.source} />
+						{item?.notes && <p className="text-xs text-zinc-500 italic">{item.notes}</p>}
 					</div>
 				</div>
 			</motion.div>
@@ -126,7 +183,12 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 	);
 }
 
-function StatRow({ label, value, currency, isVolume }: { label: string; value?: number; currency?: string; isVolume?: boolean }) {
+function StatRow({
+	label,
+	value,
+	currency,
+	isVolume,
+}: { label: string; value?: number; currency?: string; isVolume?: boolean }) {
 	return (
 		<div className="rounded-lg bg-[#111118] p-3">
 			<span className="text-[11px] text-zinc-500 block">{label}</span>

@@ -9,7 +9,7 @@ import { useState } from "react";
 function formatRelativeDate(dateStr: string): string {
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
-	const target = new Date(dateStr + "T00:00:00");
+	const target = new Date(`${dateStr}T00:00:00`);
 	const diffMs = target.getTime() - today.getTime();
 	const diffDays = Math.round(diffMs / (24 * 60 * 60 * 1000));
 
@@ -19,7 +19,7 @@ function formatRelativeDate(dateStr: string): string {
 }
 
 function formatDate(dateStr: string): string {
-	const d = new Date(dateStr + "T00:00:00");
+	const d = new Date(`${dateStr}T00:00:00`);
 	return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
@@ -49,7 +49,9 @@ export function EarningsPanel() {
 			<div className="px-3 py-2">
 				<div className="flex items-center gap-1.5 mb-2">
 					<Calendar className="h-3 w-3 text-zinc-500" />
-					<span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Earnings</span>
+					<span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+						Earnings
+					</span>
 				</div>
 				<p className="text-[11px] text-zinc-600">No upcoming earnings</p>
 			</div>
@@ -62,7 +64,9 @@ export function EarningsPanel() {
 		<div className="px-3 py-2">
 			<div className="flex items-center gap-1.5 mb-2">
 				<Calendar className="h-3 w-3 text-zinc-500" />
-				<span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Earnings</span>
+				<span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+					Earnings
+				</span>
 			</div>
 			<div className="space-y-1">
 				{displayed.map((e) => (
@@ -91,7 +95,9 @@ function EarningsRow({ event }: { event: EarningsEvent }) {
 			<span className="font-medium text-zinc-300 w-16 truncate">{event.symbol}</span>
 			<span className="text-zinc-500">{formatDate(event.date)}</span>
 			{hourLabel(event.hour) && (
-				<span className="text-[9px] rounded bg-zinc-800 px-1 py-0.5 text-zinc-500">{hourLabel(event.hour)}</span>
+				<span className="text-[9px] rounded bg-zinc-800 px-1 py-0.5 text-zinc-500">
+					{hourLabel(event.hour)}
+				</span>
 			)}
 			<span className={`tabular-nums ${isImminent ? "text-amber-400" : "text-zinc-500"}`}>
 				{relative}

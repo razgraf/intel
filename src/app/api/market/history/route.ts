@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { cacheLife } from "next/cache";
 import yahooFinance, { withTimeout } from "@/shared/lib/yahoo";
+import { cacheLife } from "next/cache";
+import { NextResponse } from "next/server";
 
 type ChartInterval =
 	| "1m"
@@ -47,10 +47,12 @@ async function fetchChart(symbol: string, range: string, interval: ChartInterval
 	cacheLife(getCacheProfile(interval));
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const result: any = await withTimeout(yahooFinance.chart(symbol, {
-		period1: getStartDate(range),
-		interval,
-	}));
+	const result: any = await withTimeout(
+		yahooFinance.chart(symbol, {
+			period1: getStartDate(range),
+			interval,
+		}),
+	);
 
 	const quotes: Array<{
 		date: Date;

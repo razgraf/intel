@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import yahooFinance, { withTimeout } from "@/shared/lib/yahoo";
+import { NextResponse } from "next/server";
 
 interface YFQuote {
 	symbol: string;
@@ -42,9 +42,7 @@ export async function GET(request: Request) {
 	const tickers = symbols.split(",").filter(Boolean);
 
 	try {
-		const results = await Promise.allSettled(
-			tickers.map((t) => fetchQuoteCached(t)),
-		);
+		const results = await Promise.allSettled(tickers.map((t) => fetchQuoteCached(t)));
 
 		const quotes = results
 			.map((r, i) => {

@@ -1,9 +1,15 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/shared/lib/api";
 import { POLL_INTERVAL, TIMEFRAME_INTERVALS, type Timeframe } from "@/shared/lib/constants";
-import type { EarningsEvent, HistoricalPoint, OptionsChain, Quote, SearchResult } from "../model/types";
+import { useQuery } from "@tanstack/react-query";
+import type {
+	EarningsEvent,
+	HistoricalPoint,
+	OptionsChain,
+	Quote,
+	SearchResult,
+} from "../model/types";
 
 export function useQuotes(symbols: string[]) {
 	const key = [...symbols].sort().join(",");

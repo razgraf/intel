@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 
 interface DialogProps {
 	open: boolean;
@@ -39,19 +39,12 @@ export function Dialog({ open, onClose, children }: DialogProps) {
 					}}
 				>
 					{/* Overlay */}
-					<div
-						className="absolute inset-0 bg-black/60"
-						onClick={onClose}
-					/>
+					<div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
 					{/* Content */}
 					<motion.div
 						className="relative w-full max-w-sm rounded-xl border border-[#1e1e2e] bg-[#111118] shadow-2xl"
-						initial={
-							shouldReduceMotion
-								? false
-								: { opacity: 0, scale: 0.95, y: 10 }
-						}
+						initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.95, y: 10 }}
 						animate={{ opacity: 1, scale: 1, y: 0 }}
 						exit={{ opacity: 0, scale: 0.95, y: 10 }}
 						transition={{

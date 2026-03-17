@@ -13,4 +13,5 @@ export interface WatchlistItem {
 	futuresTicker?: string;
 	notes?: string;
 	embed?: EmbedConfig;
+	source?: "yahoo" | "deribit";
 }

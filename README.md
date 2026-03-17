@@ -17,7 +17,7 @@ It's designed for tracking stocks, ETFs, crypto and other assets in a clean UI. 
 - **Watchlist management** — drag-to-reorder, ticker search, per-item settings (futures symbol overrides)
 - **Detail sheets** — expanded view with larger chart, timeframe selector, options chain data, external links
 - **Earnings calendar** — upcoming earnings dates (relative to device time)
-- **Market hours tracker** — live open/close status for NYSE, CME, LSE, BVB, NIKKEI, Crypto with countdown timers
+- **Market hours tracker** — live open/close status for NYSE, CME, LSE, BVB, Nikkei, Crypto, Deribit with countdown timers
 - **Embeddable special items** — add live YouTube feeds (e.g. Bloomberg Live) directly to the grid
 - **Multi-exchange awareness** — tracks 6 exchanges across US, EU, and Asia with timezone-aware status
 - **Watchlist sync** — export your watchlist as a shareable URL, import it on another device via confirmation modal
@@ -29,19 +29,19 @@ It's designed for tracking stocks, ETFs, crypto and other assets in a clean UI. 
 
 ## Tech Stack
 
-| Layer        | Tech                                                        |
-| ------------ | ----------------------------------------------------------- |
-| Framework    | Next.js 16 (with `use cache`, new React 19 directives)      |
-| UI           | Tailwind CSS 4, shadcn components, Lucide icons             |
-| Charts       | [Liveline](https://benji.org/liveline)                      |
-| Animations   | Framer Motion                                               |
-| State        | Zustand, TanStack Query                                     |
-| Data         | Yahoo Finance via `yahoo-finance2`                          |
-| Menus        | [Bloom](https://joshpuckett.me/bloom)                       |
-| Dev tooling  | [Agentation](https://agentation.dev/), Biome , TypeScript 5 |
-| Runtime      | Bun                                                         |
-| Architecture | FSD                                                         |
-| AI           | Claude with Claude Code                                     |
+| Layer        | Tech                                                                   |
+| ------------ | ---------------------------------------------------------------------- |
+| Framework    | Next.js 16 (with `use cache`, new React 19 directives)                 |
+| UI           | Tailwind CSS 4, shadcn components, Lucide icons                        |
+| Charts       | [Liveline](https://benji.org/liveline)                                 |
+| Animations   | Framer Motion                                                          |
+| State        | Zustand, TanStack Query                                                |
+| Data         | Yahoo Finance via `yahoo-finance2`, USDC-settled options via `deribit` |
+| Menus        | [Bloom](https://joshpuckett.me/bloom)                                  |
+| Dev tooling  | [Agentation](https://agentation.dev/), Biome , TypeScript 5            |
+| Runtime      | Bun                                                                    |
+| Architecture | FSD                                                                    |
+| AI           | Claude with Claude Code                                                |
 
 ## Quickstart
 

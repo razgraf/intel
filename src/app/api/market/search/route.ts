@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import yahooFinance, { withTimeout } from "@/shared/lib/yahoo";
+import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 	}
 
 	try {
-		const results = await withTimeout(yahooFinance.search(query, { newsCount: 0 })) as {
+		const results = (await withTimeout(yahooFinance.search(query, { newsCount: 0 }))) as {
 			quotes?: Array<{ symbol: string; shortname?: string; exchange?: string; quoteType?: string }>;
 		};
 		const quotes = (results.quotes ?? [])

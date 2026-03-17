@@ -14,7 +14,9 @@ export function MarketHoursPanel() {
 
 	if (!now) return null;
 
-	const statuses = EXCHANGES.map((exchange) => getExchangeStatus(exchange, now));
+	const statuses = EXCHANGES.filter((e) => !e.alwaysOn).map((exchange) =>
+		getExchangeStatus(exchange, now),
+	);
 
 	return (
 		<div className="space-y-1">

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import yahooFinance, { withTimeout } from "@/shared/lib/yahoo";
+import { NextResponse } from "next/server";
 
 interface OptionsCallOrPut {
 	strike: number;
@@ -58,6 +58,9 @@ export async function GET(request: Request) {
 		});
 	} catch (error) {
 		console.error("Options error:", error);
-		return NextResponse.json({ expirationDates: [], strikes: [], calls: [], puts: [] }, { status: 500 });
+		return NextResponse.json(
+			{ expirationDates: [], strikes: [], calls: [], puts: [] },
+			{ status: 500 },
+		);
 	}
 }

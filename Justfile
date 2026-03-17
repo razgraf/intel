@@ -7,8 +7,8 @@ build:
 lint:
     bun run lint
 
-format:
-    bun run format
+fix:
+    bun run fix
 
 typecheck:
     bunx tsc --noEmit
