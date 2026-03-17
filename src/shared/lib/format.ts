@@ -57,7 +57,9 @@ export function formatLocalTime(date: Date): string {
 }
 
 export function getLocalTimezone(): string {
-	return new Intl.DateTimeFormat("en-US", { timeZoneName: "short" })
-		.formatToParts(new Date())
-		.find((p) => p.type === "timeZoneName")?.value ?? "Local";
+	return (
+		new Intl.DateTimeFormat("en-US", { timeZoneName: "short" })
+			.formatToParts(new Date())
+			.find((p) => p.type === "timeZoneName")?.value ?? "Local"
+	);
 }

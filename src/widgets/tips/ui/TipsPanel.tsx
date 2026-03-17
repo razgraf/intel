@@ -5,9 +5,10 @@ import { useState } from "react";
 
 const TIPS = [
 	"Double click on a card or watchlist item to open the details view",
-	'Click the gear icon on watchlist items to add futures symbols where supported',
+	"Click the gear icon on watchlist items to add futures symbols where supported",
 	"Add stocks, ETFs, crypto or options by ticker to the watchlist",
 	'Add special cards to the grid like the "Bloomberg Live" embed',
+	'Search for USDC-settled crypto options using the "Deribit" prefix.',
 ];
 
 export function TipsPanel() {

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import yahooFinance, { withTimeout } from "@/shared/lib/yahoo";
+import { NextResponse } from "next/server";
 
 interface OptionsCallOrPut {
 	strike: number;
@@ -20,8 +20,7 @@ export async function GET(request: Request) {
 	}
 
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const result: any = await withTimeout(yahooFinance.options(symbol, {}));
+		const result = await withTimeout(yahooFinance.options(symbol, {}));
 
 		const MAX_CONTRACTS = 50;
 		const allCalls: OptionsCallOrPut[] = result.options?.[0]?.calls ?? [];
@@ -58,6 +57,9 @@ export async function GET(request: Request) {
 		});
 	} catch (error) {
 		console.error("Options error:", error);
-		return NextResponse.json({ expirationDates: [], strikes: [], calls: [], puts: [] }, { status: 500 });
+		return NextResponse.json(
+			{ expirationDates: [], strikes: [], calls: [], puts: [] },
+			{ status: 500 },
+		);
 	}
 }

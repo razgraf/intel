@@ -14,7 +14,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check ./src",
-    "format": "biome check --write ./src"
+    "fix": "biome check --write ./src"
   },
   "dependencies": {
     "@tanstack/react-query": "^5",
@@ -23,6 +23,7 @@
     "liveline": "^0.0.6",
     "lucide-react": "^0.487",
     "next": "16.1.6",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "yahoo-finance2": "^3",
@@ -34,7 +35,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "agentation": "^2.2.1",
+    "agentation": "^2.3.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

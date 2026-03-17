@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { cacheLife } from "next/cache";
 import yahooFinance, { withTimeout } from "@/shared/lib/yahoo";
+import { cacheLife } from "next/cache";
+import { NextResponse } from "next/server";
 
 type ChartInterval =
 	| "1m"
@@ -46,28 +46,27 @@ async function fetchChart(symbol: string, range: string, interval: ChartInterval
 	"use cache";
 	cacheLife(getCacheProfile(interval));
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const result: any = await withTimeout(yahooFinance.chart(symbol, {
-		period1: getStartDate(range),
-		interval,
-	}));
+	const result = await withTimeout(
+		yahooFinance.chart(symbol, {
+			period1: getStartDate(range),
+			interval,
+		}),
+	);
 
-	const quotes: Array<{
-		date: Date;
-		open: number | null;
-		high: number | null;
-		low: number | null;
-		close: number | null;
-	}> = result.quotes ?? [];
+	const quotes = result.quotes ?? [];
 
-	return quotes.map((q) => ({
-		time: new Date(q.date).getTime(),
-		value: q.close ?? 0,
-		open: q.open ?? 0,
-		high: q.high ?? 0,
-		low: q.low ?? 0,
-		close: q.close ?? 0,
-	}));
+	const points = quotes
+		.filter((q) => q.close != null && q.close !== 0)
+		.map((q) => ({
+			time: new Date(q.date).getTime(),
+			value: q.close,
+			open: q.open ?? q.close,
+			high: q.high ?? q.close,
+			low: q.low ?? q.close,
+			close: q.close,
+		}));
+
+	return points;
 }
 
 export async function GET(request: Request) {

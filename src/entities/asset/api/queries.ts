@@ -1,9 +1,15 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/shared/lib/api";
 import { POLL_INTERVAL, TIMEFRAME_INTERVALS, type Timeframe } from "@/shared/lib/constants";
-import type { EarningsEvent, HistoricalPoint, OptionsChain, Quote, SearchResult } from "../model/types";
+import { useQuery } from "@tanstack/react-query";
+import type {
+	EarningsEvent,
+	HistoricalPoint,
+	OptionsChain,
+	Quote,
+	SearchResult,
+} from "../model/types";
 
 export function useQuotes(symbols: string[]) {
 	const key = [...symbols].sort().join(",");
@@ -19,7 +25,15 @@ export function useChart(symbol: string | undefined, timeframe: Timeframe) {
 	const { range, interval } = TIMEFRAME_INTERVALS[timeframe];
 	return useQuery<HistoricalPoint[]>({
 		queryKey: ["chart", symbol, timeframe],
-		queryFn: () => apiFetch("/api/market/history", { symbol: symbol!, range, interval }),
+		queryFn: async () => {
+			const res = await apiFetch("/api/market/history", {
+				symbol: symbol as string,
+				range,
+				interval,
+			});
+			// Guard against stale cache returning a non-array shape
+			return Array.isArray(res) ? res : [];
+		},
 		enabled: !!symbol,
 		staleTime: 60_000,
 	});
@@ -37,7 +51,7 @@ export function useSearch(query: string) {
 export function useOptions(symbol: string | undefined) {
 	return useQuery<OptionsChain>({
 		queryKey: ["options", symbol],
-		queryFn: () => apiFetch("/api/market/options", { symbol: symbol! }),
+		queryFn: () => apiFetch("/api/market/options", { symbol: symbol as string }),
 		enabled: !!symbol,
 		staleTime: 120_000,
 	});

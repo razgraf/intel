@@ -1,6 +1,6 @@
 "use client";
 
-import { useWatchlistStore } from "@/entities/watchlist/model/store";
+import { useWatchlistHydrated, useWatchlistStore } from "@/entities/watchlist/model/store";
 import { AssetCard } from "./AssetCard";
 import { EmbedCard } from "./EmbedCard";
 
@@ -9,7 +9,10 @@ interface AssetGridProps {
 }
 
 export function AssetGrid({ onOpenDetail }: AssetGridProps) {
+	const hydrated = useWatchlistHydrated();
 	const items = useWatchlistStore((s) => s.items);
+
+	if (!hydrated) return null;
 
 	if (items.length === 0) {
 		return (
@@ -25,7 +28,11 @@ export function AssetGrid({ onOpenDetail }: AssetGridProps) {
 				item.type === "Embed" ? (
 					<EmbedCard key={item.ticker} item={item} />
 				) : (
-					<AssetCard key={item.ticker} item={item} onOpenDetail={() => onOpenDetail?.(item.ticker)} />
+					<AssetCard
+						key={item.ticker}
+						item={item}
+						onOpenDetail={() => onOpenDetail?.(item.ticker)}
+					/>
 				),
 			)}
 		</div>

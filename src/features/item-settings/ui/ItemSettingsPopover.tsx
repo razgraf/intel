@@ -58,15 +58,13 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 			</button>
 			<Dialog open={open} onClose={handleClose}>
 				<div className="p-4 space-y-4">
-					<h3 className="text-sm font-semibold text-zinc-100">
-						Settings — {item.ticker}
-					</h3>
+					<h3 className="text-sm font-semibold text-zinc-100">Settings — {item.ticker}</h3>
 
 					{/* Futures ticker with search */}
 					<div className="space-y-1.5">
-						<label className="text-[10px] uppercase tracking-wider text-zinc-500 block">
+						<span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
 							Futures Ticker
-						</label>
+						</span>
 						<p className="text-[11px] text-zinc-500 leading-tight">
 							Link a futures contract to show its price alongside the spot price
 						</p>
@@ -96,13 +94,9 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 							{debouncedQuery && (
 								<div className="absolute z-10 mt-1 w-full rounded-lg border border-[#1e1e2e] bg-[#18181b] shadow-xl max-h-40 overflow-y-auto">
 									{searching ? (
-										<div className="px-3 py-3 text-center text-xs text-zinc-500">
-											Searching...
-										</div>
+										<div className="px-3 py-3 text-center text-xs text-zinc-500">Searching...</div>
 									) : searchResults.length === 0 ? (
-										<div className="px-3 py-3 text-center text-xs text-zinc-500">
-											No results
-										</div>
+										<div className="px-3 py-3 text-center text-xs text-zinc-500">No results</div>
 									) : (
 										<ul className="py-1">
 											{searchResults.slice(0, 8).map((r) => (
@@ -116,9 +110,7 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 														}}
 														className="flex w-full items-center justify-between px-3 py-1.5 text-left hover:bg-[#1e1e2e] transition-colors"
 													>
-														<span className="text-xs font-medium text-zinc-100">
-															{r.symbol}
-														</span>
+														<span className="text-xs font-medium text-zinc-100">{r.symbol}</span>
 														<span className="text-[10px] text-zinc-500 truncate max-w-[140px] ml-2">
 															{r.shortname}
 														</span>
@@ -134,9 +126,7 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 
 					{/* Notes */}
 					<div className="space-y-1.5">
-						<label className="text-[10px] uppercase tracking-wider text-zinc-500 block">
-							Notes
-						</label>
+						<span className="text-[10px] uppercase tracking-wider text-zinc-500 block">Notes</span>
 						<p className="text-[11px] text-zinc-500 leading-tight">
 							Personal notes about this asset (not shown elsewhere)
 						</p>

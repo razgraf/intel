@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { EXCHANGES, getExchangeStatus } from "@/shared/lib/exchanges";
+import { NextResponse } from "next/server";
 
 export async function GET() {
 	const now = new Date();

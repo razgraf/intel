@@ -6,12 +6,19 @@ interface TimeframeSelectorProps {
 	value: Timeframe;
 	onChange: (tf: Timeframe) => void;
 	size?: "sm" | "md";
+	allowedTimeframes?: readonly Timeframe[];
 }
 
-export function TimeframeSelector({ value, onChange, size = "sm" }: TimeframeSelectorProps) {
+export function TimeframeSelector({
+	value,
+	onChange,
+	size = "sm",
+	allowedTimeframes,
+}: TimeframeSelectorProps) {
+	const timeframes = allowedTimeframes ?? TIMEFRAMES;
 	return (
 		<div className="flex items-center gap-0.5">
-			{TIMEFRAMES.map((tf) => (
+			{timeframes.map((tf) => (
 				<button
 					type="button"
 					key={tf}

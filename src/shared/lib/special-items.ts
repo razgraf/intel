@@ -7,4 +7,10 @@ export const SPECIAL_ITEMS: WatchlistItem[] = [
 		type: "Embed",
 		embed: { kind: "youtube", url: "https://www.youtube.com/watch?v=iEpJwprxDdk" },
 	},
+	{
+		ticker: "yahoo-finance-live",
+		label: "Yahoo Finance Live",
+		type: "Embed",
+		embed: { kind: "youtube", url: "https://www.youtube.com/watch?v=KQp-e_XQnDE" },
+	},
 ];
