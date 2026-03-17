@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 
 interface ExternalLinksProps {
 	ticker: string;
-	source?: "yahoo" | "deribit";
+	source?: "yahoo" | "deribit" | "youtube";
 	className?: string;
 }
 

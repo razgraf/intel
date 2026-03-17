@@ -15,7 +15,7 @@ interface AssetDetailChartProps {
 	currency?: string;
 	changePercent?: number;
 	spotPrice?: number;
-	source?: "yahoo" | "deribit";
+	source?: "yahoo" | "deribit" | "youtube";
 }
 
 export function AssetDetailChart({

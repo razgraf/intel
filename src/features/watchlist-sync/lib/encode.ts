@@ -16,6 +16,11 @@ export function decodeWatchlist(payload: string): WatchlistItem[] | null {
 		for (const item of parsed) {
 			if (typeof item?.ticker !== "string" || !item.ticker) return null;
 		}
+		for (const item of parsed) {
+			if (item.type === "Embed" && !item.source) {
+				item.source = "youtube";
+			}
+		}
 		return parsed as WatchlistItem[];
 	} catch {
 		return null;

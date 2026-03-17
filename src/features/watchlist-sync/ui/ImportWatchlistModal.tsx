@@ -12,6 +12,35 @@ interface ValidatedItem {
 	valid: boolean;
 }
 
+interface SourceConfig {
+	match: (item: WatchlistItem) => boolean;
+	skipValidation?: boolean;
+	validate?: (items: WatchlistItem[]) => Promise<Set<string>>;
+}
+
+async function fetchValidSet(endpoint: string, items: WatchlistItem[]): Promise<Set<string>> {
+	const tickers = items.map((i) => i.ticker).join(",");
+	if (!tickers) return new Set();
+	const res = await fetch(`${endpoint}?symbols=${encodeURIComponent(tickers)}`);
+	const data: Array<{ symbol: string }> = await res.json();
+	return new Set(Array.isArray(data) ? data.map((q) => q.symbol) : []);
+}
+
+const SOURCE_CONFIGS: Record<string, SourceConfig> = {
+	embed: {
+		match: (i) => i.type?.toLowerCase() === "embed",
+		skipValidation: true,
+	},
+	deribit: {
+		match: (i) => i.source === "deribit",
+		validate: (items) => fetchValidSet("/api/deribit/quote", items),
+	},
+	yahoo: {
+		match: () => true, // fallback
+		validate: (items) => fetchValidSet("/api/market/quote", items),
+	},
+};
+
 export function ImportWatchlistModal() {
 	const [items, setItems] = useState<ValidatedItem[] | null>(null);
 	const [open, setOpen] = useState(false);
@@ -32,24 +61,38 @@ export function ImportWatchlistModal() {
 		setLoading(true);
 		setOpen(true);
 
-		const quotable = decoded.filter((i) => i.type !== "Embed");
-		const tickers = quotable.map((i) => i.ticker).join(",");
+		const buckets = new Map<SourceConfig, WatchlistItem[]>();
+		for (const item of decoded) {
+			const config = Object.values(SOURCE_CONFIGS).find((c) => c.match(item));
+			if (!config) continue;
+			const list = buckets.get(config) ?? [];
+			list.push(item);
+			buckets.set(config, list);
+		}
 
-		const validate = tickers
-			? fetch(`/api/market/quote?symbols=${encodeURIComponent(tickers)}`)
-					.then((res) => res.json())
-					.then(
-						(data: Array<{ symbol: string }>) =>
-							new Set(Array.isArray(data) ? data.map((q) => q.symbol) : []),
-					)
-					.catch(() => new Set<string>(quotable.map((i) => i.ticker)))
-			: Promise.resolve(new Set<string>());
+		const skippedTickers = new Set<string>();
+		const validationPromises: Promise<Set<string>>[] = [];
 
-		validate
-			.then((found) => {
+		for (const [config, configItems] of buckets) {
+			if (config.skipValidation) {
+				for (const item of configItems) skippedTickers.add(item.ticker);
+			} else if (config.validate) {
+				validationPromises.push(
+					config
+						.validate(configItems)
+						.catch(() => new Set<string>(configItems.map((i) => i.ticker))),
+				);
+			}
+		}
+
+		Promise.all(validationPromises)
+			.then((sets) => {
+				const foundSet = new Set<string>(skippedTickers);
+				for (const s of sets) for (const t of s) foundSet.add(t);
+
 				const validated: ValidatedItem[] = decoded.map((item) => ({
 					item,
-					valid: item.type === "Embed" || found.has(item.ticker),
+					valid: foundSet.has(item.ticker),
 				}));
 				setItems(validated);
 			})
