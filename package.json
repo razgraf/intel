@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "framer-motion": "^12",
     "liveline": "^0.0.6",
     "lucide-react": "^0.487",
