@@ -2,28 +2,33 @@
 
 # Intel
 
-A market-watching hub I'm building for personal use. Running on my spare desktop screen so I can display it for a few hours at a time.
+Market-watching hub. Running most of the day on my spare desktop screen.
 
-Designed for tracking stocks, ETFs, crypto, options and other assets in a clean UI. Envisioned to support customizable extras like live financial feeds with plans for keyword tracking, automated AI reports, and whatever else can help users navigate the markets.
+Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, live financial feeds in a clean UI.
 
-[Features](#features) || [Tracked assets](#assets) || [Deploy your own](#quickstart)
+[Features](#features) ⋅ [Tracked assets](#tracked-assets) ⋅ [Deploy your own](#quickstart)
 
 ![Dashboard](/assets/ss-dashboard.png)
 
-## Features
+### Features
 
-- **Real-time asset grid** — interactive charts for stocks, ETFs, crypto, options (incl. crypto through Deribit), indexes, bonds, futures
-- **Watchlist** — drag-to-reorder, ticker search, per-item settings (futures symbol overrides). Import/export via URL or QR code to share lists across devices.
-- **Earnings and events** — upcoming earnings dates (relative to device time) and FOMC meetings
-- **Market hours** — live open/close status for various exchanges
-- **Embeddable special items** — in-grid live YouTube feeds (e.g. Bloomberg)
-- **Tips slideshow** — rotating tips in the sidebar for discoverability
-
-| Details                            | Settings (e.g. add futures ticker)   | Import / Export watchlist          |
+| Details                            | Item enhancements                    | Export-able watchlist              |
 | :--------------------------------- | :----------------------------------- | :--------------------------------- |
 | ![Details](/assets/ss-details.png) | ![Settings](/assets/ss-settings.png) | ![Restore](/assets/ss-restore.png) |
 
-### Assets
+**Real-time asset grid** — interactive charts for stocks, ETFs, crypto, options (incl. crypto through Deribit), indexes, bonds, futures
+
+**Watchlist** — drag-to-reorder, ticker search, per-item settings (futures symbol overrides). Import/export via URL or QR code to share lists across devices.
+
+**Earnings and events** — upcoming earnings dates (relative to device time) and FOMC meetings
+
+**Market hours** — live open/close status for various exchanges
+
+**Embeddable special items** — in-grid live YouTube feeds (e.g. Bloomberg)
+
+**Tips slideshow** — rotating tips in the sidebar for discoverability
+
+### Tracked Assets
 
 | Asset          | How to search          | Example                                                                              |
 | :------------- | :--------------------- | :----------------------------------------------------------------------------------- |
@@ -55,7 +60,10 @@ Deploy your own copy of Intel to Vercel in one click.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/razgraf/intel&project-name=intel-by-razgraf)
 
-## Tech Stack
+### Tech stack and plans
+
+<details>
+<summary>Tech stack</summary>
 
 | Layer        | Tech                                                                   |
 | :----------- | :--------------------------------------------------------------------- |
@@ -70,15 +78,17 @@ Deploy your own copy of Intel to Vercel in one click.
 | Architecture | FSD                                                                    |
 | AI           | Claude with Claude Code                                                |
 
-<details>
-<summary>Roadmap / Ideas</summary>
+</details>
 
-- [x] Deribit options supported
+<details>
+<summary>Roadmap</summary>
+
+- [x] Deribit options
+- [ ] Polymarket or Kalshi markets
+- [ ] Price alerts and notifications
 - [ ] More reliable data sources (Yahoo may rate-limit or be incomplete), maybe Alpha Vantage (?)
 - [ ] More special grid items (keyword trackers, AI-generated market reports, news feeds)
-- [ ] Hosting as a live web app
 - [ ] Commercial version with paid subscriptions
-- [ ] Price alerts and notifications
 </details>
 
 ## License
