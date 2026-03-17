@@ -20,8 +20,7 @@ export async function GET(request: Request) {
 	}
 
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const result: any = await withTimeout(yahooFinance.options(symbol, {}));
+		const result = await withTimeout(yahooFinance.options(symbol, {}));
 
 		const MAX_CONTRACTS = 50;
 		const allCalls: OptionsCallOrPut[] = result.options?.[0]?.calls ?? [];

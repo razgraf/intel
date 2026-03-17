@@ -13,8 +13,9 @@ import { MarketHoursPanel } from "@/widgets/market-hours/ui/MarketHoursPanel";
 import { TipsPanel } from "@/widgets/tips/ui/TipsPanel";
 import { WatchlistPanel } from "@/widgets/watchlist/ui/WatchlistPanel";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Copy, PanelRight, Settings } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Check, Copy, Link, PanelRight, QrCode, Settings, X } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function DashboardLayout() {
 	const [selectedTicker, setSelectedTicker] = useState<string | undefined>();
@@ -22,6 +23,7 @@ export function DashboardLayout() {
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [copied, setCopied] = useState(false);
+	const [qrOpen, setQrOpen] = useState(false);
 	const [localTime, setLocalTime] = useState("");
 	const [timezone, setTimezone] = useState("");
 	const watchlistItems = useWatchlistStore((s) => s.items);
@@ -35,14 +37,18 @@ export function DashboardLayout() {
 
 	const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
-	const handleExport = useCallback(() => {
+	const exportUrl = useMemo(() => {
+		if (typeof window === "undefined") return "";
 		const payload = encodeWatchlist(watchlistItems);
-		const url = `${window.location.origin}${window.location.pathname}?watchlist=${payload}`;
-		navigator.clipboard.writeText(url).then(() => {
+		return `${window.location.origin}${window.location.pathname}?watchlist=${payload}`;
+	}, [watchlistItems]);
+
+	const handleExport = useCallback(() => {
+		navigator.clipboard.writeText(exportUrl).then(() => {
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		});
-	}, [watchlistItems]);
+	}, [exportUrl]);
 
 	useEffect(() => {
 		function handleEscape(e: KeyboardEvent) {
@@ -144,27 +150,99 @@ export function DashboardLayout() {
 
 			{/* Settings dialog */}
 			<Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
-				<div className="p-5">
-					<h2 className="text-sm font-semibold text-zinc-100 mb-4">Settings</h2>
-					<button
-						type="button"
-						onClick={handleExport}
-						className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
-					>
-						{copied ? (
-							<>
-								<Check className="h-3.5 w-3.5 text-emerald-400" />
-								Copied!
-							</>
-						) : (
-							<>
-								<Copy className="h-3.5 w-3.5" />
-								Export Watchlist
-							</>
-						)}
-					</button>
-					<p className="text-[10px] text-zinc-600 mt-2 text-center">
-						Copies a shareable link to your clipboard
+				<div className="p-5 space-y-4">
+					<div className="flex items-center justify-between">
+						<h2 className="text-sm font-semibold text-zinc-100">Settings</h2>
+						<button
+							type="button"
+							onClick={() => setSettingsOpen(false)}
+							className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+							aria-label="Close"
+						>
+							<X className="h-4 w-4" />
+						</button>
+					</div>
+
+					<div className="space-y-2">
+						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Export Watchlist</h3>
+						<div className="grid grid-cols-2 gap-2">
+							<button
+								type="button"
+								onClick={handleExport}
+								className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
+							>
+								{copied ? (
+									<>
+										<Check className="h-3.5 w-3.5 text-emerald-400" />
+										Copied!
+									</>
+								) : (
+									<>
+										<Link className="h-3.5 w-3.5" />
+										URL
+									</>
+								)}
+							</button>
+							<button
+								type="button"
+								onClick={() => setQrOpen(true)}
+								className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
+							>
+								<QrCode className="h-3.5 w-3.5" />
+								QR Code
+							</button>
+						</div>
+					</div>
+
+					<div className="rounded-lg border border-[#1e1e2e] bg-[#111118] p-3 space-y-2">
+						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Technical Details</h3>
+						<dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-[11px]">
+							<dt className="text-zinc-500">Polling interval</dt>
+							<dd className="text-zinc-300 text-right tabular-nums">60s</dd>
+							<dt className="text-zinc-500">Chart cache (stale time)</dt>
+							<dd className="text-zinc-300 text-right tabular-nums">60s</dd>
+							<dt className="text-zinc-500">Search cache</dt>
+							<dd className="text-zinc-300 text-right tabular-nums">30s</dd>
+							<dt className="text-zinc-500">Options cache</dt>
+							<dd className="text-zinc-300 text-right tabular-nums">120s</dd>
+							<dt className="text-zinc-500">Earnings cache</dt>
+							<dd className="text-zinc-300 text-right tabular-nums">6h</dd>
+							<dt className="text-zinc-500">Deribit preview cache</dt>
+							<dd className="text-zinc-300 text-right tabular-nums">5m</dd>
+							<dt className="text-zinc-500">Watchlist items</dt>
+							<dd className="text-zinc-300 text-right tabular-nums">{watchlistItems.length}</dd>
+						</dl>
+					</div>
+				</div>
+			</Dialog>
+
+			{/* QR code dialog */}
+			<Dialog open={qrOpen} onClose={() => setQrOpen(false)}>
+				<div className="p-5 space-y-4">
+					<div className="flex items-center justify-between">
+						<h2 className="text-sm font-semibold text-zinc-100">QR Code</h2>
+						<button
+							type="button"
+							onClick={() => setQrOpen(false)}
+							className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+							aria-label="Close"
+						>
+							<X className="h-4 w-4" />
+						</button>
+					</div>
+					<div className="flex justify-center">
+						<div className="rounded-lg border border-[#1e1e2e] bg-white p-3">
+							<QRCodeSVG
+								value={exportUrl}
+								size={256}
+								bgColor="#ffffff"
+								fgColor="#0a0a0f"
+								level="L"
+							/>
+						</div>
+					</div>
+					<p className="text-[10px] text-zinc-600 text-center">
+						Scan to import this watchlist on another device
 					</p>
 				</div>
 			</Dialog>

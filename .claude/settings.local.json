@@ -1,5 +1,9 @@
 {
   "permissions": {
-    "allow": ["WebFetch(domain:docs.deribit.com)"]
+    "allow": [
+      "Bash(just:*)",
+      "Bash(bun run:*)",
+      "WebFetch(domain:docs.deribit.com)"
+    ]
   }
 }

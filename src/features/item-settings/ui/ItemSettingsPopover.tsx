@@ -62,9 +62,9 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 
 					{/* Futures ticker with search */}
 					<div className="space-y-1.5">
-						<label className="text-[10px] uppercase tracking-wider text-zinc-500 block">
+						<span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
 							Futures Ticker
-						</label>
+						</span>
 						<p className="text-[11px] text-zinc-500 leading-tight">
 							Link a futures contract to show its price alongside the spot price
 						</p>
@@ -126,9 +126,7 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 
 					{/* Notes */}
 					<div className="space-y-1.5">
-						<label className="text-[10px] uppercase tracking-wider text-zinc-500 block">
-							Notes
-						</label>
+						<span className="text-[10px] uppercase tracking-wider text-zinc-500 block">Notes</span>
 						<p className="text-[11px] text-zinc-500 leading-tight">
 							Personal notes about this asset (not shown elsewhere)
 						</p>

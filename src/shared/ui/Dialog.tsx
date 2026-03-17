@@ -29,7 +29,7 @@ export function Dialog({ open, onClose, children }: DialogProps) {
 		<AnimatePresence>
 			{open && (
 				<motion.div
-					className="fixed inset-0 z-50 flex items-center justify-center"
+					className="fixed inset-0 z-50 flex items-center justify-center p-4"
 					initial={shouldReduceMotion ? false : { opacity: 0 }}
 					animate={{ opacity: 1 }}
 					exit={{ opacity: 0 }}
@@ -37,9 +37,18 @@ export function Dialog({ open, onClose, children }: DialogProps) {
 						duration: shouldReduceMotion ? 0 : EXIT_DURATION,
 						ease: EASING,
 					}}
+					onClick={(e) => e.stopPropagation()}
+					onPointerDown={(e) => e.stopPropagation()}
 				>
 					{/* Overlay */}
-					<div className="absolute inset-0 bg-black/60" onClick={onClose} />
+					<div
+						className="absolute inset-0 bg-black/60"
+						role="presentation"
+						onClick={onClose}
+						onKeyDown={(e) => {
+							if (e.key === "Enter" || e.key === " ") onClose();
+						}}
+					/>
 
 					{/* Content */}
 					<motion.div

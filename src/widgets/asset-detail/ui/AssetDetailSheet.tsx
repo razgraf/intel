@@ -5,6 +5,7 @@ import { useOptions, useQuotes } from "@/entities/asset/api/queries";
 import { inferAssetType } from "@/entities/asset/model/types";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { ExternalLinks } from "@/features/external-links/ui/ExternalLinks";
+import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
 import { formatPercent, formatPrice } from "@/shared/lib/format";
 import { motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
@@ -72,12 +73,27 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 				transition={{ duration: 0.25, ease: EASE_OUT_QUART }}
 			>
 				{/* Header */}
-				<div className="sticky top-0 bg-[#0a0a0f]/95 backdrop-blur-sm border-b border-[#1e1e2e] p-4 flex items-center justify-between z-10">
-					<div className="flex items-center gap-3">
-						<span className="text-lg font-semibold text-zinc-100">{ticker}</span>
-						<span className="rounded bg-zinc-800 px-2 py-0.5 text-xs text-zinc-500">{type}</span>
+				<div className="sticky top-0 bg-[#0a0a0f]/95 backdrop-blur-sm border-b border-[#1e1e2e] p-4 flex items-start justify-between gap-3 z-10">
+					<div className="flex flex-wrap items-center gap-2 min-w-0">
+						<span className="text-lg font-semibold text-zinc-100 shrink-0">{ticker}</span>
+						<span
+							className="rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-zinc-400 shrink-0"
+							style={{
+								color: ASSET_TYPE_COLORS[type as keyof typeof ASSET_TYPE_COLORS] ?? "#71717a",
+							}}
+						>
+							{type}
+						</span>
+						<span className="rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-zinc-400 shrink-0">
+							{currency}
+						</span>
+						{isDeribit && (
+							<span className="rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-emerald-400 shrink-0">
+								Deribit
+							</span>
+						)}
 						{spotQuote?.shortName && (
-							<span className="text-sm text-zinc-500">{spotQuote.shortName}</span>
+							<span className="text-sm text-zinc-500 truncate">{spotQuote.shortName}</span>
 						)}
 					</div>
 					<button

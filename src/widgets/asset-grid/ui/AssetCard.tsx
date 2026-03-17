@@ -134,6 +134,11 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 					<span className="flex items-center gap-1 rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-zinc-400">
 						{currencyLabel}
 					</span>
+					{isDeribit && (
+						<span className="flex items-center gap-1 rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-emerald-400">
+							Deribit
+						</span>
+					)}
 				</div>
 				<button
 					type="button"

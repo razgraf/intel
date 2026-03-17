@@ -39,7 +39,7 @@ export function useDeribitQuotes(symbols: string[]) {
 export function useDeribitChart(symbol: string | undefined, timeframe: DeribitTimeframe) {
 	return useQuery<HistoricalPoint[]>({
 		queryKey: ["deribit-chart", symbol, timeframe],
-		queryFn: () => apiFetch("/api/deribit/history", { symbol: symbol!, range: timeframe }),
+		queryFn: () => apiFetch("/api/deribit/history", { symbol: symbol as string, range: timeframe }),
 		enabled: !!symbol,
 		staleTime: 60_000,
 	});
