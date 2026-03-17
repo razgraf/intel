@@ -39,7 +39,14 @@ export function MarketHoursPanel() {
 							/>
 							<span className="text-zinc-300 truncate">{status.exchange.name}</span>
 						</div>
-						<span className="text-zinc-500 tabular-nums text-right">
+						<span
+							className="text-zinc-500 tabular-nums text-right"
+							title={
+								Number.isFinite(status.minutesUntilChange)
+									? `${status.isOpen ? "Closes" : "Opens"} at ${new Date(now.getTime() + status.minutesUntilChange * 60_000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })} GMT`
+									: undefined
+							}
+						>
 							{status.isOpen
 								? status.exchange.id === "crypto"
 									? "24/7"

@@ -41,10 +41,72 @@ const SOURCE_CONFIGS: Record<string, SourceConfig> = {
 	},
 };
 
-export function ImportWatchlistModal() {
+interface ImportWatchlistModalProps {
+	externalPayload?: string | null;
+	onExternalClose?: () => void;
+}
+
+function validatePayload(
+	payload: string,
+	callbacks: {
+		onStart: () => void;
+		onResult: (items: ValidatedItem[]) => void;
+		onFinally: () => void;
+		onEmpty: () => void;
+	},
+) {
+	const decoded = decodeWatchlist(payload);
+	if (!decoded || decoded.length === 0) {
+		callbacks.onEmpty();
+		return;
+	}
+
+	callbacks.onStart();
+
+	const buckets = new Map<SourceConfig, WatchlistItem[]>();
+	for (const item of decoded) {
+		const config = Object.values(SOURCE_CONFIGS).find((c) => c.match(item));
+		if (!config) continue;
+		const list = buckets.get(config) ?? [];
+		list.push(item);
+		buckets.set(config, list);
+	}
+
+	const skippedTickers = new Set<string>();
+	const validationPromises: Promise<Set<string>>[] = [];
+
+	for (const [config, configItems] of buckets) {
+		if (config.skipValidation) {
+			for (const item of configItems) skippedTickers.add(item.ticker);
+		} else if (config.validate) {
+			validationPromises.push(
+				config.validate(configItems).catch(() => new Set<string>(configItems.map((i) => i.ticker))),
+			);
+		}
+	}
+
+	Promise.all(validationPromises)
+		.then((sets) => {
+			const foundSet = new Set<string>(skippedTickers);
+			for (const s of sets) for (const t of s) foundSet.add(t);
+
+			const validated: ValidatedItem[] = decoded.map((item) => ({
+				item,
+				valid: foundSet.has(item.ticker),
+			}));
+			callbacks.onResult(validated);
+		})
+		.finally(() => callbacks.onFinally());
+}
+
+export function ImportWatchlistModal({
+	externalPayload,
+	onExternalClose,
+}: ImportWatchlistModalProps = {}) {
 	const [items, setItems] = useState<ValidatedItem[] | null>(null);
 	const [open, setOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
+	const [isExternal, setIsExternal] = useState(false);
 	const reorder = useWatchlistStore((s) => s.reorder);
 
 	useEffect(() => {
@@ -52,52 +114,32 @@ export function ImportWatchlistModal() {
 		const payload = params.get("watchlist");
 		if (!payload) return;
 
-		const decoded = decodeWatchlist(payload);
-		if (!decoded || decoded.length === 0) {
-			clearParam();
-			return;
-		}
-
-		setLoading(true);
+		setIsExternal(false);
 		setOpen(true);
-
-		const buckets = new Map<SourceConfig, WatchlistItem[]>();
-		for (const item of decoded) {
-			const config = Object.values(SOURCE_CONFIGS).find((c) => c.match(item));
-			if (!config) continue;
-			const list = buckets.get(config) ?? [];
-			list.push(item);
-			buckets.set(config, list);
-		}
-
-		const skippedTickers = new Set<string>();
-		const validationPromises: Promise<Set<string>>[] = [];
-
-		for (const [config, configItems] of buckets) {
-			if (config.skipValidation) {
-				for (const item of configItems) skippedTickers.add(item.ticker);
-			} else if (config.validate) {
-				validationPromises.push(
-					config
-						.validate(configItems)
-						.catch(() => new Set<string>(configItems.map((i) => i.ticker))),
-				);
-			}
-		}
-
-		Promise.all(validationPromises)
-			.then((sets) => {
-				const foundSet = new Set<string>(skippedTickers);
-				for (const s of sets) for (const t of s) foundSet.add(t);
-
-				const validated: ValidatedItem[] = decoded.map((item) => ({
-					item,
-					valid: foundSet.has(item.ticker),
-				}));
-				setItems(validated);
-			})
-			.finally(() => setLoading(false));
+		validatePayload(payload, {
+			onStart: () => setLoading(true),
+			onResult: (validated) => setItems(validated),
+			onFinally: () => setLoading(false),
+			onEmpty: () => clearParam(),
+		});
 	}, []);
+
+	useEffect(() => {
+		if (!externalPayload) return;
+
+		setIsExternal(true);
+		setItems(null);
+		setOpen(true);
+		validatePayload(externalPayload, {
+			onStart: () => setLoading(true),
+			onResult: (validated) => setItems(validated),
+			onFinally: () => setLoading(false),
+			onEmpty: () => {
+				setOpen(false);
+				onExternalClose?.();
+			},
+		});
+	}, [externalPayload, onExternalClose]);
 
 	const clearParam = useCallback(() => {
 		const url = new URL(window.location.href);
@@ -109,14 +151,22 @@ export function ImportWatchlistModal() {
 		if (!items) return;
 		const valid = items.filter((i) => i.valid).map((i) => i.item);
 		reorder(valid);
-		clearParam();
+		if (isExternal) {
+			onExternalClose?.();
+		} else {
+			clearParam();
+		}
 		setOpen(false);
-	}, [items, reorder, clearParam]);
+	}, [items, reorder, clearParam, isExternal, onExternalClose]);
 
 	const handleCancel = useCallback(() => {
-		clearParam();
+		if (isExternal) {
+			onExternalClose?.();
+		} else {
+			clearParam();
+		}
 		setOpen(false);
-	}, [clearParam]);
+	}, [clearParam, isExternal, onExternalClose]);
 
 	const validCount = items?.filter((i) => i.valid).length ?? 0;
 

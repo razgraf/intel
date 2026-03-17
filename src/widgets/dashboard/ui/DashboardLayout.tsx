@@ -15,7 +15,7 @@ import { MarketHoursPanel } from "@/widgets/market-hours/ui/MarketHoursPanel";
 import { TipsPanel } from "@/widgets/tips/ui/TipsPanel";
 import { WatchlistPanel } from "@/widgets/watchlist/ui/WatchlistPanel";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Copy, Link, PanelRight, QrCode, Settings, X } from "lucide-react";
+import { Check, Copy, Link, PanelRight, QrCode, Settings, Upload, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -26,6 +26,9 @@ export function DashboardLayout() {
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [copied, setCopied] = useState(false);
 	const [qrOpen, setQrOpen] = useState(false);
+	const [restoreOpen, setRestoreOpen] = useState(false);
+	const [restoreUrl, setRestoreUrl] = useState("");
+	const [restorePayload, setRestorePayload] = useState<string | null>(null);
 	const [localTime, setLocalTime] = useState("");
 	const [timezone, setTimezone] = useState("");
 	const watchlistItems = useWatchlistStore((s) => s.items);
@@ -52,6 +55,24 @@ export function DashboardLayout() {
 			setTimeout(() => setCopied(false), 2000);
 		});
 	}, [exportUrl]);
+
+	const handleRestoreConfirm = useCallback(() => {
+		try {
+			const url = new URL(restoreUrl);
+			const payload = url.searchParams.get("watchlist");
+			if (payload) {
+				setRestorePayload(payload);
+			}
+		} catch {
+			// invalid URL — ignore
+		}
+		setRestoreOpen(false);
+		setRestoreUrl("");
+	}, [restoreUrl]);
+
+	const clearRestorePayload = useCallback(() => {
+		setRestorePayload(null);
+	}, []);
 
 	useEffect(() => {
 		function handleEscape(e: KeyboardEvent) {
@@ -168,7 +189,7 @@ export function DashboardLayout() {
 
 					<div className="space-y-2">
 						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Export Watchlist</h3>
-						<div className="grid grid-cols-2 gap-2">
+						<div className="grid grid-cols-3 gap-2">
 							<button
 								type="button"
 								onClick={handleExport}
@@ -193,6 +214,14 @@ export function DashboardLayout() {
 							>
 								<QrCode className="h-3.5 w-3.5" />
 								QR Code
+							</button>
+							<button
+								type="button"
+								onClick={() => setRestoreOpen(true)}
+								className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
+							>
+								<Upload className="h-3.5 w-3.5" />
+								Restore
 							</button>
 						</div>
 					</div>
@@ -266,8 +295,70 @@ export function DashboardLayout() {
 				</div>
 			</Dialog>
 
+			{/* Restore watchlist dialog */}
+			<Dialog
+				open={restoreOpen}
+				onClose={() => {
+					setRestoreOpen(false);
+					setRestoreUrl("");
+				}}
+			>
+				<div className="p-5 space-y-4">
+					<div className="flex items-center justify-between">
+						<h2 className="text-sm font-semibold text-zinc-100">Restore Watchlist</h2>
+						<button
+							type="button"
+							onClick={() => {
+								setRestoreOpen(false);
+								setRestoreUrl("");
+							}}
+							className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+							aria-label="Close"
+						>
+							<X className="h-4 w-4" />
+						</button>
+					</div>
+					<p className="text-xs text-zinc-400">
+						Paste a watchlist URL to restore it on this device.
+					</p>
+					<input
+						type="url"
+						value={restoreUrl}
+						onChange={(e) => setRestoreUrl(e.target.value)}
+						placeholder="https://example.com/?watchlist=..."
+						className="w-full rounded-lg border border-[#1e1e2e] bg-[#111118] px-3 py-2 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-600"
+						onKeyDown={(e) => {
+							if (e.key === "Enter" && restoreUrl) handleRestoreConfirm();
+						}}
+					/>
+					<div className="flex gap-2 justify-end">
+						<button
+							type="button"
+							onClick={() => {
+								setRestoreOpen(false);
+								setRestoreUrl("");
+							}}
+							className="px-3 py-1.5 text-xs rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							onClick={handleRestoreConfirm}
+							disabled={!restoreUrl}
+							className="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+						>
+							Confirm
+						</button>
+					</div>
+				</div>
+			</Dialog>
+
 			{/* Import from URL */}
-			<ImportWatchlistModal />
+			<ImportWatchlistModal
+				externalPayload={restorePayload}
+				onExternalClose={clearRestorePayload}
+			/>
 		</div>
 	);
 }
