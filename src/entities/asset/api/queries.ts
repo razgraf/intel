@@ -25,7 +25,15 @@ export function useChart(symbol: string | undefined, timeframe: Timeframe) {
 	const { range, interval } = TIMEFRAME_INTERVALS[timeframe];
 	return useQuery<HistoricalPoint[]>({
 		queryKey: ["chart", symbol, timeframe],
-		queryFn: () => apiFetch("/api/market/history", { symbol: symbol as string, range, interval }),
+		queryFn: async () => {
+			const res = await apiFetch("/api/market/history", {
+				symbol: symbol as string,
+				range,
+				interval,
+			});
+			// Guard against stale cache returning a non-array shape
+			return Array.isArray(res) ? res : [];
+		},
 		enabled: !!symbol,
 		staleTime: 60_000,
 	});

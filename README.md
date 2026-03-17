@@ -15,7 +15,7 @@ Designed for tracking stocks, ETFs, crypto and other assets in a clean UI. Envis
 
 - **Real-time asset grid** — interactive charts for stocks, ETFs, crypto, options (incl. crypto through Deribit), indexes, bonds, futures
 - **Watchlist** — drag-to-reorder, ticker search, per-item settings (futures symbol overrides). Import/export via URL or QR code to share lists across devices.
-- **Earnings calendar** — upcoming earnings dates (relative to device time)
+- **Earnings and events** — upcoming earnings dates (relative to device time) and FOMC meetings
 - **Market hours** — live open/close status for various exchanges
 - **Embeddable special items** — in-grid live YouTube feeds (e.g. Bloomberg)
 - **Tips slideshow** — rotating tips in the sidebar for discoverability
@@ -69,7 +69,7 @@ Open [http://localhost:3100](http://localhost:3100).
 ## Roadmap
 
 - [x] Deribit options supported
-- [ ] More reliable data sources (Yahoo Finance may rate-limit or return stale data)
+- [ ] More reliable data sources (Yahoo may rate-limit or be incomplete), maybe Alpha Vantage (?)
 - [ ] More special grid items (keyword trackers, AI-generated market reports, news feeds)
 - [ ] Hosting as a live web app
 - [ ] Commercial version with paid subscriptions

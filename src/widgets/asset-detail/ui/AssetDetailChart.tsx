@@ -82,8 +82,10 @@ export function AssetDetailChart({
 
 	const chartWindow = useMemo(() => {
 		if (livelineData.length >= 2) {
-			const span = livelineData[livelineData.length - 1].time - livelineData[0].time;
-			return Math.ceil(span * 1.1);
+			const now = Date.now() / 1000;
+			const dataSpan = livelineData[livelineData.length - 1].time - livelineData[0].time;
+			const fullSpan = now - livelineData[0].time;
+			return Math.ceil(Math.max(dataSpan, fullSpan) * 1.1);
 		}
 		return TIMEFRAME_INTERVALS[timeframe].windowSecs;
 	}, [livelineData, timeframe]);

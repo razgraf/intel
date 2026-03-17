@@ -7,14 +7,15 @@ import {
 } from "@/entities/asset/api/deribit-queries";
 import { useChart, useQuotes } from "@/entities/asset/api/queries";
 import { inferAssetType } from "@/entities/asset/model/types";
+import { useChartPreferencesStore } from "@/entities/chart-preferences/model/store";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { TimeframeSelector } from "@/features/chart-timeframe/ui/TimeframeSelector";
 import { ExternalLinks } from "@/features/external-links/ui/ExternalLinks";
-import { ASSET_TYPE_COLORS, TIMEFRAME_INTERVALS, type Timeframe } from "@/shared/lib/constants";
+import { ASSET_TYPE_COLORS, TIMEFRAME_INTERVALS } from "@/shared/lib/constants";
 import { formatPrice } from "@/shared/lib/format";
 import { Liveline } from "liveline";
 import { Expand } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 interface AssetCardProps {
 	item: WatchlistItem;
@@ -23,7 +24,10 @@ interface AssetCardProps {
 
 export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 	const isDeribit = item.source === "deribit";
-	const [timeframe, setTimeframe] = useState<Timeframe>(isDeribit ? "1D" : "1W");
+	const defaultTf = isDeribit ? "1D" : "1W";
+	const storedTf = useChartPreferencesStore((s) => s.timeframes[item.ticker]);
+	const setTimeframe = useChartPreferencesStore((s) => s.setTimeframe);
+	const timeframe = storedTf ?? defaultTf;
 
 	// Yahoo data
 	const { data: yahooQuotes = [] } = useQuotes(
@@ -101,12 +105,15 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 
 	// Derive window from actual data span so the chart fills the full width,
 	// instead of using a fixed calendar window that leaves empty space for
-	// markets with limited trading hours.
+	// markets with limited trading hours. When the market is closed, the
+	// gap between data and now can exceed the data's own span — use the
+	// larger of the two so Liveline's visible window always includes the data.
 	const chartWindow = useMemo(() => {
 		if (livelineData.length >= 2) {
-			const span = livelineData[livelineData.length - 1].time - livelineData[0].time;
-			// Add 5% padding on each side
-			return Math.ceil(span * 1.1);
+			const now = Date.now() / 1000;
+			const dataSpan = livelineData[livelineData.length - 1].time - livelineData[0].time;
+			const fullSpan = now - livelineData[0].time;
+			return Math.ceil(Math.max(dataSpan, fullSpan) * 1.1);
 		}
 		return TIMEFRAME_INTERVALS[timeframe].windowSecs;
 	}, [livelineData, timeframe]);
@@ -183,7 +190,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 			{/* Timeframe selector */}
 			<TimeframeSelector
 				value={timeframe}
-				onChange={setTimeframe}
+				onChange={(tf) => setTimeframe(item.ticker, tf)}
 				allowedTimeframes={isDeribit ? ["1D", "1W", "1M"] : undefined}
 			/>
 

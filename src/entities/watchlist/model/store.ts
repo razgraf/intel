@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { WatchlistItem } from "./types";
@@ -41,3 +42,13 @@ export const useWatchlistStore = create<WatchlistState>()(
 		{ name: "intel-watchlist" },
 	),
 );
+
+export function useWatchlistHydrated() {
+	const [hydrated, setHydrated] = useState(false);
+	useEffect(() => {
+		const unsub = useWatchlistStore.persist.onFinishHydration(() => setHydrated(true));
+		if (useWatchlistStore.persist.hasHydrated()) setHydrated(true);
+		return unsub;
+	}, []);
+	return hydrated;
+}

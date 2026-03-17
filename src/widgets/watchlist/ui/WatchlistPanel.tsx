@@ -2,7 +2,7 @@
 
 import { useDeribitQuotes } from "@/entities/asset/api/deribit-queries";
 import { useQuotes } from "@/entities/asset/api/queries";
-import { useWatchlistStore } from "@/entities/watchlist/model/store";
+import { useWatchlistHydrated, useWatchlistStore } from "@/entities/watchlist/model/store";
 import { TickerSearchInput } from "@/features/ticker-search/ui/TickerSearchInput";
 import { Reorder } from "framer-motion";
 import { WatchlistRow } from "./WatchlistRow";
@@ -14,6 +14,7 @@ interface WatchlistPanelProps {
 }
 
 export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: WatchlistPanelProps) {
+	const hydrated = useWatchlistHydrated();
 	const items = useWatchlistStore((s) => s.items);
 	const add = useWatchlistStore((s) => s.add);
 	const reorder = useWatchlistStore((s) => s.reorder);
@@ -26,6 +27,8 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 
 	const quoteMap = new Map(quotes.map((q) => [q.symbol, q]));
 	const deribitQuoteMap = new Map(deribitQuotes.map((q) => [q.symbol, q]));
+
+	if (!hydrated) return null;
 
 	return (
 		<div className="flex flex-col h-full">

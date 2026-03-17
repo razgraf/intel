@@ -55,7 +55,7 @@ async function fetchChart(symbol: string, range: string, interval: ChartInterval
 
 	const quotes = result.quotes ?? [];
 
-	return quotes
+	const points = quotes
 		.filter((q) => q.close != null && q.close !== 0)
 		.map((q) => ({
 			time: new Date(q.date).getTime(),
@@ -65,6 +65,8 @@ async function fetchChart(symbol: string, range: string, interval: ChartInterval
 			low: q.low ?? q.close,
 			close: q.close,
 		}));
+
+	return points;
 }
 
 export async function GET(request: Request) {

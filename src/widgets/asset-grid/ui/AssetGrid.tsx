@@ -1,6 +1,6 @@
 "use client";
 
-import { useWatchlistStore } from "@/entities/watchlist/model/store";
+import { useWatchlistHydrated, useWatchlistStore } from "@/entities/watchlist/model/store";
 import { AssetCard } from "./AssetCard";
 import { EmbedCard } from "./EmbedCard";
 
@@ -9,7 +9,10 @@ interface AssetGridProps {
 }
 
 export function AssetGrid({ onOpenDetail }: AssetGridProps) {
+	const hydrated = useWatchlistHydrated();
 	const items = useWatchlistStore((s) => s.items);
+
+	if (!hydrated) return null;
 
 	if (items.length === 0) {
 		return (

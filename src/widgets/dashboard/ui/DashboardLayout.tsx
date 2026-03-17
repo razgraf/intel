@@ -1,14 +1,16 @@
 "use client";
 
+import { useChartPreferencesStore } from "@/entities/chart-preferences/model/store";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { encodeWatchlist } from "@/features/watchlist-sync/lib/encode";
 import { ImportWatchlistModal } from "@/features/watchlist-sync/ui/ImportWatchlistModal";
+import type { Timeframe } from "@/shared/lib/constants";
 import { EXCHANGES, getExchangeStatus } from "@/shared/lib/exchanges";
 import { formatLocalTime, getLocalTimezone } from "@/shared/lib/format";
 import { Dialog } from "@/shared/ui/Dialog";
 import { AssetDetailSheet } from "@/widgets/asset-detail/ui/AssetDetailSheet";
 import { AssetGrid } from "@/widgets/asset-grid/ui/AssetGrid";
-import { EarningsPanel } from "@/widgets/earnings/ui/EarningsPanel";
+import { EventsPanel } from "@/widgets/earnings/ui/EarningsPanel";
 import { MarketHoursPanel } from "@/widgets/market-hours/ui/MarketHoursPanel";
 import { TipsPanel } from "@/widgets/tips/ui/TipsPanel";
 import { WatchlistPanel } from "@/widgets/watchlist/ui/WatchlistPanel";
@@ -27,6 +29,7 @@ export function DashboardLayout() {
 	const [localTime, setLocalTime] = useState("");
 	const [timezone, setTimezone] = useState("");
 	const watchlistItems = useWatchlistStore((s) => s.items);
+	const resetAllTimeframes = useChartPreferencesStore((s) => s.resetAll);
 
 	useEffect(() => {
 		setLocalTime(formatLocalTime(new Date()));
@@ -194,6 +197,22 @@ export function DashboardLayout() {
 						</div>
 					</div>
 
+					<div className="space-y-2">
+						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Reset Time View</h3>
+						<div className="grid grid-cols-3 gap-2">
+							{(["1D", "1W", "1M"] as const).map((tf) => (
+								<button
+									key={tf}
+									type="button"
+									onClick={() => resetAllTimeframes(tf as Timeframe, watchlistItems)}
+									className="flex items-center justify-center px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
+								>
+									{tf}
+								</button>
+							))}
+						</div>
+					</div>
+
 					<div className="rounded-lg border border-[#1e1e2e] bg-[#111118] p-3 space-y-2">
 						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Technical Details</h3>
 						<dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-[11px]">
@@ -275,9 +294,9 @@ function SidebarContent({
 				<TipsPanel />
 			</div>
 			<div className="border-t border-[#1e1e2e] shrink-0">
-				<EarningsPanel />
+				<EventsPanel />
 			</div>
-			<div className="border-t border-[#1e1e2e] p-3 shrink-0">
+			<div className="border-t border-[#1e1e2e] shrink-0">
 				<MarketHoursPanel />
 			</div>
 		</>
