@@ -62,14 +62,16 @@ async function fetchChart(symbol: string, range: string, interval: ChartInterval
 		close: number | null;
 	}> = result.quotes ?? [];
 
-	return quotes.map((q) => ({
-		time: new Date(q.date).getTime(),
-		value: q.close ?? 0,
-		open: q.open ?? 0,
-		high: q.high ?? 0,
-		low: q.low ?? 0,
-		close: q.close ?? 0,
-	}));
+	return quotes
+		.filter((q) => q.close != null && q.close !== 0)
+		.map((q) => ({
+			time: new Date(q.date).getTime(),
+			value: q.close!,
+			open: q.open ?? q.close!,
+			high: q.high ?? q.close!,
+			low: q.low ?? q.close!,
+			close: q.close!,
+		}));
 }
 
 export async function GET(request: Request) {
