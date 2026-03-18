@@ -1,8 +1,10 @@
 "use client";
 
 import { useSearch } from "@/entities/asset/api/queries";
+import { isCountdownItem } from "@/entities/watchlist/model/helpers";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
+import { CountdownDialog } from "@/features/countdown/ui/CountdownDialog";
 import { Dialog } from "@/shared/ui/Dialog";
 import { Search, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -45,6 +47,42 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 			notes: notes || undefined,
 		});
 		handleClose();
+	}
+
+	if (isCountdownItem(item)) {
+		return (
+			<>
+				<button
+					type="button"
+					onClick={(e) => {
+						e.stopPropagation();
+						setOpen(true);
+					}}
+					className="rounded p-0.5 text-zinc-600 hover:bg-zinc-800 hover:text-zinc-300 transition-colors"
+				>
+					<Settings className="h-3 w-3" />
+				</button>
+				<CountdownDialog
+					open={open}
+					onClose={handleClose}
+					initialTitle={item.title ?? ""}
+					initialValue={item.countdown?.rawInput ?? item.label ?? ""}
+					title="Edit Countdown"
+					onSave={({ title, rawInput, targetAt }) => {
+						update(item.ticker, {
+							title: title || undefined,
+							label: rawInput,
+							source: "countdown",
+							countdown: {
+								rawInput,
+								targetAt: targetAt.toISOString(),
+							},
+						});
+						handleClose();
+					}}
+				/>
+			</>
+		);
 	}
 
 	return (

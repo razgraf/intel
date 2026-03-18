@@ -5,13 +5,20 @@ export interface EmbedConfig {
 	url: string;
 }
 
+export interface CountdownConfig {
+	rawInput: string;
+	targetAt: string;
+}
+
 export interface WatchlistItem {
 	ticker: string;
+	title?: string;
 	label?: string;
-	type?: AssetType | "Embed";
+	type?: AssetType | "Embed" | "Countdown";
 	currency?: string;
 	futuresTicker?: string;
 	notes?: string;
 	embed?: EmbedConfig;
-	source?: "yahoo" | "deribit" | "youtube";
+	countdown?: CountdownConfig;
+	source?: "yahoo" | "deribit" | "youtube" | "countdown";
 }

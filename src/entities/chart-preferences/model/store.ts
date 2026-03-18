@@ -1,5 +1,6 @@
 "use client";
 
+import { isSpecialWatchlistItem } from "@/entities/watchlist/model/helpers";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import type { Timeframe } from "@/shared/lib/constants";
 import { create } from "zustand";
@@ -25,7 +26,7 @@ export const useChartPreferencesStore = create<ChartPreferencesState>()(
 				set(() => {
 					const timeframes: Record<string, Timeframe> = {};
 					for (const item of items) {
-						if (item.embed) continue;
+						if (isSpecialWatchlistItem(item)) continue;
 						const isDeribit = item.source === "deribit";
 						timeframes[item.ticker] = isDeribit && !DERIBIT_TIMEFRAMES.includes(tf) ? "1D" : tf;
 					}

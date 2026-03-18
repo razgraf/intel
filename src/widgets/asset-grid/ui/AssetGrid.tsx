@@ -2,6 +2,7 @@
 
 import { useWatchlistHydrated, useWatchlistStore } from "@/entities/watchlist/model/store";
 import { AssetCard } from "./AssetCard";
+import { CountdownCard } from "./CountdownCard";
 import { EmbedCard } from "./EmbedCard";
 
 interface AssetGridProps {
@@ -27,6 +28,8 @@ export function AssetGrid({ onOpenDetail }: AssetGridProps) {
 			{items.map((item) =>
 				item.type === "Embed" ? (
 					<EmbedCard key={item.ticker} item={item} />
+				) : item.type === "Countdown" ? (
+					<CountdownCard key={item.ticker} item={item} />
 				) : (
 					<AssetCard
 						key={item.ticker}

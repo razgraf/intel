@@ -4,6 +4,7 @@ import { SegmentedControl } from "@/components/ui/segmented-control";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { PREVIEW_ITEMS } from "@/shared/config/preview-items";
 import { AssetCard } from "@/widgets/asset-grid/ui/AssetCard";
+import { CountdownCard } from "@/widgets/asset-grid/ui/CountdownCard";
 import { EmbedCard } from "@/widgets/asset-grid/ui/EmbedCard";
 import { useState } from "react";
 
@@ -41,6 +42,8 @@ export default function PreviewPage() {
 				<div data-preview-ticker={activeItem.ticker} className="w-98 max-w-98">
 					{activeItem.type === "Embed" ? (
 						<EmbedCard item={activeItem} />
+					) : activeItem.type === "Countdown" ? (
+						<CountdownCard item={activeItem} />
 					) : (
 						<AssetCard item={activeItem} />
 					)}

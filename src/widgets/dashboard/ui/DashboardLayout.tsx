@@ -15,7 +15,7 @@ import { MarketHoursPanel } from "@/widgets/market-hours/ui/MarketHoursPanel";
 import { TipsPanel } from "@/widgets/tips/ui/TipsPanel";
 import { WatchlistPanel } from "@/widgets/watchlist/ui/WatchlistPanel";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Copy, Link, PanelRight, QrCode, Settings, Upload, X } from "lucide-react";
+import { ArrowUpRight, Check, Link, PanelRight, QrCode, Settings, Upload, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -55,6 +55,11 @@ export function DashboardLayout() {
 			setTimeout(() => setCopied(false), 2000);
 		});
 	}, [exportUrl]);
+
+	const handleOpenPreview = useCallback(() => {
+		setSettingsOpen(false);
+		window.location.assign("/preview");
+	}, []);
 
 	const handleRestoreConfirm = useCallback(() => {
 		try {
@@ -184,6 +189,18 @@ export function DashboardLayout() {
 							aria-label="Close"
 						>
 							<X className="h-4 w-4" />
+						</button>
+					</div>
+
+					<div className="space-y-2">
+						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Preview</h3>
+						<button
+							type="button"
+							onClick={handleOpenPreview}
+							className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-zinc-800 px-3 py-2 text-xs text-zinc-200 transition-colors hover:bg-zinc-700"
+						>
+							<ArrowUpRight className="h-3.5 w-3.5" />
+							Show watchlist examples
 						</button>
 					</div>
 

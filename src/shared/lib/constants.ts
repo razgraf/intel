@@ -36,7 +36,7 @@ export const COLORS = {
 	textSecondary: "#a1a1aa",
 } as const;
 
-export const ASSET_TYPE_COLORS: Record<AssetType | "Embed", string> = {
+export const ASSET_TYPE_COLORS: Record<AssetType | "Embed" | "Countdown", string> = {
 	Stock: "#3b82f6",
 	ETF: "#a78bfa",
 	Crypto: "#f59e0b",
@@ -45,6 +45,7 @@ export const ASSET_TYPE_COLORS: Record<AssetType | "Embed", string> = {
 	Option: "#fb923c",
 	Index: "#38bdf8",
 	Embed: "#e11d48",
+	Countdown: "#facc15",
 };
 
 export const POLL_INTERVAL = 60_000; // 1 minute to avoid rate limits

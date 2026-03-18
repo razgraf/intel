@@ -2,9 +2,13 @@
 
 import { useDeribitQuotes } from "@/entities/asset/api/deribit-queries";
 import { useQuotes } from "@/entities/asset/api/queries";
+import { isCountdownItem, isSpecialWatchlistItem } from "@/entities/watchlist/model/helpers";
 import { useWatchlistHydrated, useWatchlistStore } from "@/entities/watchlist/model/store";
+import { CountdownDialog } from "@/features/countdown/ui/CountdownDialog";
 import { TickerSearchInput } from "@/features/ticker-search/ui/TickerSearchInput";
+import { createCountdownItem } from "@/shared/lib/countdown";
 import { Reorder } from "framer-motion";
+import { useState } from "react";
 import { WatchlistRow } from "./WatchlistRow";
 
 interface WatchlistPanelProps {
@@ -18,9 +22,14 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 	const items = useWatchlistStore((s) => s.items);
 	const add = useWatchlistStore((s) => s.add);
 	const reorder = useWatchlistStore((s) => s.reorder);
+	const [countdownOpen, setCountdownOpen] = useState(false);
 
-	const yahooTickers = items.filter((i) => i.source !== "deribit").map((i) => i.ticker);
-	const deribitTickers = items.filter((i) => i.source === "deribit").map((i) => i.ticker);
+	const yahooTickers = items
+		.filter((i) => i.source !== "deribit" && !isSpecialWatchlistItem(i))
+		.map((i) => i.ticker);
+	const deribitTickers = items
+		.filter((i) => i.source === "deribit" && !isSpecialWatchlistItem(i))
+		.map((i) => i.ticker);
 
 	const { data: quotes = [] } = useQuotes(yahooTickers);
 	const { data: deribitQuotes = [] } = useDeribitQuotes(deribitTickers);
@@ -33,7 +42,15 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 	return (
 		<div className="flex flex-col h-full">
 			<div className="px-2 pb-2">
-				<TickerSearchInput onSelect={add} placeholder="Add ticker or embed..." />
+				<TickerSearchInput
+					onSelect={add}
+					onConfigureSpecial={(item) => {
+						if (isCountdownItem(item)) {
+							setCountdownOpen(true);
+						}
+					}}
+					placeholder="Add ticker or special card..."
+				/>
 			</div>
 			<div className="flex-1 overflow-y-auto px-1">
 				{items.length === 0 ? (
@@ -62,6 +79,15 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 					</Reorder.Group>
 				)}
 			</div>
+			<CountdownDialog
+				open={countdownOpen}
+				onClose={() => setCountdownOpen(false)}
+				onSave={({ title, rawInput, targetAt }) => {
+					add(createCountdownItem(title, rawInput, targetAt));
+					setCountdownOpen(false);
+				}}
+				title="New Countdown"
+			/>
 		</div>
 	);
 }
