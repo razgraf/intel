@@ -1,5 +1,6 @@
 "use client";
 
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { type DeribitTimeframe, useDeribitChart } from "@/entities/asset/api/deribit-queries";
 import { useChart } from "@/entities/asset/api/queries";
 import { TimeframeSelector } from "@/features/chart-timeframe/ui/TimeframeSelector";
@@ -112,7 +113,16 @@ export function AssetDetailChart({
 
 	return (
 		<div className="space-y-3">
-			{showTradingView && <ProviderTabs active={activeProvider} onChange={setActiveProvider} />}
+			{showTradingView && (
+				<SegmentedControl
+					value={activeProvider}
+					onChange={setActiveProvider}
+					options={[
+						{ label: "Native", value: "native" },
+						{ label: "TradingView", value: "tradingview" },
+					]}
+				/>
+			)}
 
 			{activeProvider === "tradingview" ? (
 				<TradingViewChart ticker={ticker} type={type} />
@@ -179,30 +189,6 @@ export function AssetDetailChart({
 					</div>
 				</>
 			)}
-		</div>
-	);
-}
-
-function ProviderTabs({
-	active,
-	onChange,
-}: { active: "native" | "tradingview"; onChange: (p: "native" | "tradingview") => void }) {
-	return (
-		<div className="flex items-center gap-1 rounded-lg bg-zinc-800 p-0.5 w-fit">
-			<button
-				type="button"
-				onClick={() => onChange("native")}
-				className={`rounded px-2.5 py-1 text-xs transition-colors ${active === "native" ? "bg-zinc-700 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"}`}
-			>
-				Native
-			</button>
-			<button
-				type="button"
-				onClick={() => onChange("tradingview")}
-				className={`rounded px-2.5 py-1 text-xs transition-colors ${active === "tradingview" ? "bg-zinc-700 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"}`}
-			>
-				TradingView
-			</button>
 		</div>
 	);
 }

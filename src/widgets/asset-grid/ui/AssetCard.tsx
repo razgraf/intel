@@ -150,7 +150,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 				<button
 					type="button"
 					onClick={onOpenDetail}
-					className="text-zinc-600 hover:text-zinc-300 transition-colors"
+					className="relative inline-flex items-center justify-center text-zinc-600 transition-colors hover:text-zinc-300 before:absolute before:-inset-2 before:content-[''] md:cursor-pointer"
 				>
 					<Expand className="h-3.5 w-3.5" />
 				</button>
@@ -254,7 +254,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 				<button
 					type="button"
 					onClick={onOpenDetail}
-					className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors"
+					className="relative text-[11px] text-zinc-500 transition-colors hover:text-zinc-300 before:absolute before:-inset-2 before:content-[''] md:cursor-pointer"
 				>
 					Details
 				</button>
