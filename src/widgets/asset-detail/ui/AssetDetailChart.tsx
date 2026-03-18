@@ -9,6 +9,9 @@ import { Liveline, LivelineTransition } from "liveline";
 import type { CandlePoint } from "liveline";
 import { BarChart3, TrendingUp } from "lucide-react";
 import { useMemo, useState } from "react";
+import { TradingViewChart } from "./TradingViewChart";
+
+const TV_SUPPORTED_TYPES: string[] = ["Stock", "ETF", "Crypto"];
 
 interface AssetDetailChartProps {
 	ticker: string;
@@ -16,6 +19,7 @@ interface AssetDetailChartProps {
 	changePercent?: number;
 	spotPrice?: number;
 	source?: "yahoo" | "deribit" | "youtube";
+	type?: string;
 }
 
 export function AssetDetailChart({
@@ -24,10 +28,14 @@ export function AssetDetailChart({
 	changePercent = 0,
 	spotPrice = 0,
 	source,
+	type,
 }: AssetDetailChartProps) {
 	const isDeribit = source === "deribit";
 	const [timeframe, setTimeframe] = useState<Timeframe>(isDeribit ? "1D" : "1M");
 	const [mode, setMode] = useState<"line" | "candle">("line");
+
+	const showTradingView = !isDeribit && !!type && TV_SUPPORTED_TYPES.includes(type);
+	const [activeProvider, setActiveProvider] = useState<"native" | "tradingview">("native");
 
 	const deribitTimeframe = (
 		["1D", "1W", "1M"].includes(timeframe) ? timeframe : "1D"
@@ -104,65 +112,97 @@ export function AssetDetailChart({
 
 	return (
 		<div className="space-y-3">
-			<div className="flex items-center justify-between">
-				<TimeframeSelector
-					value={timeframe}
-					onChange={setTimeframe}
-					size="md"
-					allowedTimeframes={isDeribit ? ["1D", "1W", "1M"] : undefined}
-				/>
-				<div className="flex items-center gap-1 rounded-lg bg-zinc-800 p-0.5">
-					<button
-						type="button"
-						onClick={() => setMode("line")}
-						className={`rounded p-1 transition-colors ${mode === "line" ? "bg-zinc-700 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"}`}
-					>
-						<TrendingUp className="h-3.5 w-3.5" />
-					</button>
-					<button
-						type="button"
-						onClick={() => setMode("candle")}
-						className={`rounded p-1 transition-colors ${mode === "candle" ? "bg-zinc-700 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"}`}
-					>
-						<BarChart3 className="h-3.5 w-3.5" />
-					</button>
-				</div>
-			</div>
+			{showTradingView && <ProviderTabs active={activeProvider} onChange={setActiveProvider} />}
 
-			<div className="h-100 w-full">
-				<LivelineTransition active={mode}>
-					<Liveline
-						key="line"
-						data={livelineData}
-						value={currentPrice}
-						window={chartWindow}
-						theme="dark"
-						color={changePercent >= 0 ? "#22c55e" : "#ef4444"}
-						fill
-						grid
-						scrub
-						loading={isLoading}
-						formatValue={(v) => formatPrice(v, currency)}
-						formatTime={formatChartTime}
-						style={{ width: "100%", height: "100%" }}
-					/>
-					<Liveline
-						key="candle"
-						data={livelineData}
-						value={currentPrice}
-						window={chartWindow}
-						mode="candle"
-						candles={candleData}
-						theme="dark"
-						grid
-						scrub
-						loading={isLoading}
-						formatValue={(v) => formatPrice(v, currency)}
-						formatTime={formatChartTime}
-						style={{ width: "100%", height: "100%" }}
-					/>
-				</LivelineTransition>
-			</div>
+			{activeProvider === "tradingview" ? (
+				<TradingViewChart ticker={ticker} type={type} />
+			) : (
+				<>
+					<div className="flex items-center justify-between">
+						<TimeframeSelector
+							value={timeframe}
+							onChange={setTimeframe}
+							size="md"
+							allowedTimeframes={isDeribit ? ["1D", "1W", "1M"] : undefined}
+						/>
+						<div className="flex items-center gap-1 rounded-lg bg-zinc-800 p-0.5">
+							<button
+								type="button"
+								onClick={() => setMode("line")}
+								className={`rounded p-1 transition-colors ${mode === "line" ? "bg-zinc-700 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"}`}
+							>
+								<TrendingUp className="h-3.5 w-3.5" />
+							</button>
+							<button
+								type="button"
+								onClick={() => setMode("candle")}
+								className={`rounded p-1 transition-colors ${mode === "candle" ? "bg-zinc-700 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"}`}
+							>
+								<BarChart3 className="h-3.5 w-3.5" />
+							</button>
+						</div>
+					</div>
+
+					<div className="h-100 w-full">
+						<LivelineTransition active={mode}>
+							<Liveline
+								key="line"
+								data={livelineData}
+								value={currentPrice}
+								window={chartWindow}
+								theme="dark"
+								color={changePercent >= 0 ? "#22c55e" : "#ef4444"}
+								fill
+								grid
+								scrub
+								loading={isLoading}
+								formatValue={(v) => formatPrice(v, currency)}
+								formatTime={formatChartTime}
+								style={{ width: "100%", height: "100%" }}
+							/>
+							<Liveline
+								key="candle"
+								data={livelineData}
+								value={currentPrice}
+								window={chartWindow}
+								mode="candle"
+								candles={candleData}
+								theme="dark"
+								grid
+								scrub
+								loading={isLoading}
+								formatValue={(v) => formatPrice(v, currency)}
+								formatTime={formatChartTime}
+								style={{ width: "100%", height: "100%" }}
+							/>
+						</LivelineTransition>
+					</div>
+				</>
+			)}
+		</div>
+	);
+}
+
+function ProviderTabs({
+	active,
+	onChange,
+}: { active: "native" | "tradingview"; onChange: (p: "native" | "tradingview") => void }) {
+	return (
+		<div className="flex items-center gap-1 rounded-lg bg-zinc-800 p-0.5 w-fit">
+			<button
+				type="button"
+				onClick={() => onChange("native")}
+				className={`rounded px-2.5 py-1 text-xs transition-colors ${active === "native" ? "bg-zinc-700 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"}`}
+			>
+				Native
+			</button>
+			<button
+				type="button"
+				onClick={() => onChange("tradingview")}
+				className={`rounded px-2.5 py-1 text-xs transition-colors ${active === "tradingview" ? "bg-zinc-700 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"}`}
+			>
+				TradingView
+			</button>
 		</div>
 	);
 }
