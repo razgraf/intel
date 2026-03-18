@@ -20,6 +20,9 @@ export function decodeWatchlist(payload: string): WatchlistItem[] | null {
 			if (item.type === "Embed" && !item.source) {
 				item.source = "youtube";
 			}
+			if (item.type === "Countdown" && !item.source) {
+				item.source = "countdown";
+			}
 		}
 		return parsed as WatchlistItem[];
 	} catch {

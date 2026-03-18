@@ -250,7 +250,12 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 
 			{/* Footer */}
 			<div className="flex items-center mt-auto justify-between py-1 pt-3 border-t border-[#1e1e2e]">
-				<ExternalLinks ticker={item.ticker} source={item.source} />
+				<ExternalLinks
+					ticker={item.ticker}
+					source={
+						item.source === "deribit" ? "deribit" : item.source === "youtube" ? "youtube" : "yahoo"
+					}
+				/>
 				<button
 					type="button"
 					onClick={onOpenDetail}

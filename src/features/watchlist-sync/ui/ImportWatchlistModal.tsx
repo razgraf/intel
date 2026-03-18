@@ -31,6 +31,10 @@ const SOURCE_CONFIGS: Record<string, SourceConfig> = {
 		match: (i) => i.type?.toLowerCase() === "embed",
 		skipValidation: true,
 	},
+	countdown: {
+		match: (i) => i.type?.toLowerCase() === "countdown",
+		skipValidation: true,
+	},
 	deribit: {
 		match: (i) => i.source === "deribit",
 		validate: (items) => fetchValidSet("/api/deribit/quote", items),

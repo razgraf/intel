@@ -38,6 +38,15 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 	const changePercent = isDeribit ? 0 : (spotQuote?.regularMarketChangePercent ?? 0);
 	const currency = isDeribit ? "USD" : (spotQuote?.currency ?? item?.currency ?? "USD");
 	const type = item?.type ?? inferAssetType(spotQuote?.quoteType ?? "");
+	const chartSource =
+		item?.source === "deribit"
+			? "deribit"
+			: item?.source === "youtube"
+				? "youtube"
+				: item?.source === "yahoo"
+					? "yahoo"
+					: undefined;
+	const externalSource = item?.source === "deribit" ? "deribit" : "yahoo";
 
 	// Average IV from first 5 ATM calls
 	const avgIV =
@@ -130,7 +139,7 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 						currency={currency}
 						changePercent={changePercent}
 						spotPrice={price}
-						source={item?.source}
+						source={chartSource}
 						type={type}
 					/>
 
@@ -191,7 +200,7 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 
 					{/* Links */}
 					<div className="flex items-center justify-between pt-2 border-t border-[#1e1e2e]">
-						<ExternalLinks ticker={ticker} source={item?.source} />
+						<ExternalLinks ticker={ticker} source={externalSource} />
 						{item?.notes && <p className="text-xs text-zinc-500 italic">{item.notes}</p>}
 					</div>
 				</div>

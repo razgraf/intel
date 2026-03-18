@@ -30,7 +30,7 @@ Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, 
 
 ### Tracked Items
 
-| Asset           | How to search          | Example                                                     | Preview                                                     |
+| Item / Asset    | How to search          | Example                                                     | Preview                                                     |
 | :-------------- | :--------------------- | :---------------------------------------------------------- | :---------------------------------------------------------- |
 | Stock           | Company name or ticker | `AAPL`, `SNN.RO`                                            | <img src="./assets/cards/stock.png" height="64" />          |
 | ETF             | Fund name or ticker    | `VWCE.DE`, `SPY`                                            | <img src="./assets/cards/etf.png" height="64" />            |
@@ -40,6 +40,7 @@ Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, 
 | Option (stock)  | Option ticker          | `TSLA250321C00250000` — `<Ticker><YYMMDD><C\|P><00Price00>` | <img src="./assets/cards/option-stock.png" height="64" />   |
 | Option (crypto) | "Deribit" + ticker     | `Deribit <Ticker>_USDC-<DDMMMYY>-<Price>-<C\|P>`            | <img src="./assets/cards/option-deribit.png" height="64" /> |
 | Live feed       | "Bloomberg" or "Yahoo" | YouTube embed in grid                                       | <img src="./assets/cards/embed.png" height="64" />          |
+| Countdown       | Countdown              | `May 16th 9PM` or Natural language                          | <img src="./assets/cards/countdown.png" height="64" />      |
 
 ## Quickstart
 
@@ -64,18 +65,19 @@ Deploy your own copy of Intel to Vercel in one click.
 <details>
 <summary>Tech stack</summary>
 
-| Layer        | Tech                                                                   |
-| :----------- | :--------------------------------------------------------------------- |
-| Framework    | Next.js 16 (with `use cache`, new React 19 directives)                 |
-| UI           | Tailwind CSS 4, Base UI primitives, Lucide icons                       |
-| Charts       | [Liveline](https://benji.org/liveline)                                 |
-| Animations   | Framer Motion                                                          |
-| State        | Zustand, TanStack Query                                                |
-| Data         | Yahoo Finance via `yahoo-finance2`, USDC-settled options via `deribit` |
-| Dev tooling  | [Agentation](https://agentation.dev/), Biome, TypeScript 5             |
-| Runtime      | Bun                                                                    |
-| Architecture | FSD                                                                    |
-| AI           | Claude, Codex                                                          |
+| Layer        | Tech                                                                                                                                            |
+| :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework    | Next.js 16 (with `use cache`, new React 19 directives)                                                                                          |
+| UI           | Tailwind CSS 4, Base UI primitives, Lucide icons                                                                                                |
+| Charts       | [Liveline](https://benji.org/liveline)                                                                                                          |
+| Numbers      | [Caligraph](https://calligraph.raphaelsalaja.com/), [Number Flow](https://number-flow.barvian.me/), [Chrono](https://github.com/wanasit/chrono) |
+| Animations   | Framer Motion                                                                                                                                   |
+| State        | Zustand, TanStack Query                                                                                                                         |
+| Data         | Yahoo Finance via `yahoo-finance2`, USDC-settled options via `deribit`                                                                          |
+| Dev tooling  | [Agentation](https://agentation.dev/), Biome, TypeScript 5                                                                                      |
+| Runtime      | Bun                                                                                                                                             |
+| Architecture | FSD                                                                                                                                             |
+| AI           | Claude, Codex                                                                                                                                   |
 
 </details>
 

@@ -3,6 +3,7 @@
 import { useDeribitPreview, useDeribitSearch } from "@/entities/asset/api/deribit-queries";
 import { useSearch } from "@/entities/asset/api/queries";
 import { inferAssetType } from "@/entities/asset/model/types";
+import { isCountdownItem } from "@/entities/watchlist/model/helpers";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
 import { SPECIAL_ITEMS } from "@/shared/lib/special-items";
@@ -11,11 +12,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 interface TickerSearchInputProps {
 	onSelect: (item: WatchlistItem) => void;
+	onConfigureSpecial?: (item: WatchlistItem) => void;
 	placeholder?: string;
 }
 
 export function TickerSearchInput({
 	onSelect,
+	onConfigureSpecial,
 	placeholder = "Search ticker...",
 }: TickerSearchInputProps) {
 	const [query, setQuery] = useState("");
@@ -136,7 +139,11 @@ export function TickerSearchInput({
 									<button
 										type="button"
 										onClick={() => {
-											onSelect(item);
+											if (isCountdownItem(item)) {
+												onConfigureSpecial?.(item);
+											} else {
+												onSelect(item);
+											}
 											setQuery("");
 											setDebouncedQuery("");
 											setIsOpen(false);
@@ -149,11 +156,18 @@ export function TickerSearchInput({
 										<span
 											className="rounded px-1.5 py-0.5 text-[10px] font-medium"
 											style={{
-												color: ASSET_TYPE_COLORS.Embed,
-												backgroundColor: `${ASSET_TYPE_COLORS.Embed}15`,
+												color:
+													ASSET_TYPE_COLORS[
+														(item.type ?? "Embed") as keyof typeof ASSET_TYPE_COLORS
+													],
+												backgroundColor: `${
+													ASSET_TYPE_COLORS[
+														(item.type ?? "Embed") as keyof typeof ASSET_TYPE_COLORS
+													]
+												}15`,
 											}}
 										>
-											Embed
+											{item.type}
 										</span>
 									</button>
 								</li>

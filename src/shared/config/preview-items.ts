@@ -46,6 +46,17 @@ export const PREVIEW_ITEMS: WatchlistItem[] = [
 		currency: "USD",
 	},
 	{
+		ticker: "countdown-preview",
+		title: "Fed Decision",
+		label: "March 18, 2026 7:00 PM",
+		type: "Countdown",
+		source: "countdown",
+		countdown: {
+			rawInput: "March 18, 2026 7:00 PM",
+			targetAt: "2026-03-18T19:00:00.000Z",
+		},
+	},
+	{
 		ticker: "bloomberg-live",
 		label: "Bloomberg Live",
 		type: "Embed",

@@ -2,6 +2,12 @@ import type { WatchlistItem } from "@/entities/watchlist/model/types";
 
 export const SPECIAL_ITEMS: WatchlistItem[] = [
 	{
+		ticker: "countdown",
+		label: "Countdown",
+		type: "Countdown",
+		source: "countdown",
+	},
+	{
 		ticker: "bloomberg-live",
 		label: "Bloomberg Live",
 		type: "Embed",
