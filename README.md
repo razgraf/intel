@@ -10,7 +10,7 @@ Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, 
 
 ![Dashboard](/assets/ss-dashboard.png)
 
-### Features
+## Features
 
 | Details                            | Item enhancements                    | Export-able watchlist              |
 | :--------------------------------- | :----------------------------------- | :--------------------------------- |
@@ -28,19 +28,21 @@ Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, 
 
 **Tips slideshow** — rotating tips in the sidebar for discoverability
 
-### Tracked Items
+## Tracked Items
 
-| Item / Asset    | How to search          | Example                                                     | Preview                                                     |
-| :-------------- | :--------------------- | :---------------------------------------------------------- | :---------------------------------------------------------- |
-| Stock           | Company name or ticker | `AAPL`, `SNN.RO`                                            | <img src="./assets/cards/stock.png" height="64" />          |
-| ETF             | Fund name or ticker    | `VWCE.DE`, `SPY`                                            | <img src="./assets/cards/etf.png" height="64" />            |
-| Index           | Index name or ticker   | `^GSPC`, `^DJI` — Yahoo prefixes with `^`                   | <img src="./assets/cards/index.png" height="64" />          |
-| Crypto          | Coin name              | `BTC-USD`, `ETH-USD` — pairs with USD                       | <img src="./assets/cards/crypto.png" height="64" />         |
-| Future          | Futures symbol         | `ES=F`, `GC=F` — Yahoo suffixes with `=F`                   | <img src="./assets/cards/future.png" height="64" />         |
-| Option (stock)  | Option ticker          | `TSLA250321C00250000` — `<Ticker><YYMMDD><C\|P><00Price00>` | <img src="./assets/cards/option-stock.png" height="64" />   |
-| Option (crypto) | "Deribit" + ticker     | `Deribit <Ticker>_USDC-<DDMMMYY>-<Price>-<C\|P>`            | <img src="./assets/cards/option-deribit.png" height="64" /> |
-| Live feed       | "Bloomberg" or "Yahoo" | YouTube embed in grid                                       | <img src="./assets/cards/embed.png" height="64" />          |
-| Countdown       | Countdown              | `May 16th 9PM` or Natural language                          | <img src="./assets/cards/countdown.png" height="64" />      |
+Or spin up the app and explore examples on the `/preview` page.
+
+| Item / Asset    | How to search          | Example                                          | Preview                                                     |
+| :-------------- | :--------------------- | :----------------------------------------------- | :---------------------------------------------------------- |
+| Stock           | Company name or ticker | `AAPL`, `SNN.RO`                                 | <img src="./assets/cards/stock.png" height="72" />          |
+| ETF             | Fund name or ticker    | `VWCE.DE`, `SPY`                                 | <img src="./assets/cards/etf.png" height="72" />            |
+| Index           | Index name or ticker   | `^GSPC`, `^DJI` — Yahoo prefixes with `^`        | <img src="./assets/cards/index.png" height="72" />          |
+| Crypto          | Coin name              | `BTC-USD`, `ETH-USD` — pairs with USD            | <img src="./assets/cards/crypto.png" height="72" />         |
+| Future          | Futures symbol         | `ES=F`, `GC=F` — Yahoo suffixes with `=F`        | <img src="./assets/cards/future.png" height="72" />         |
+| Option (stock)  | Option ticker          | `<Ticker><YYMMDD><C\|P><00Price00>`              | <img src="./assets/cards/option-stock.png" height="72" />   |
+| Option (crypto) | "Deribit" + ticker     | `Deribit <Ticker>_USDC-<DDMMMYY>-<Price>-<C\|P>` | <img src="./assets/cards/option-deribit.png" height="72" /> |
+| Live feed       | "Bloomberg" or "Yahoo" | YouTube embed in grid                            | <img src="./assets/cards/embed.png" height="72" />          |
+| Countdown       | Countdown              | `May 16th 9PM` or Natural language               | <img src="./assets/cards/countdown.png" height="72" />      |
 
 ## Quickstart
 
@@ -60,7 +62,7 @@ Deploy your own copy of Intel to Vercel in one click.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/razgraf/intel&project-name=intel-by-razgraf)
 
-### Tech stack and plans
+## Tech stack and plans
 
 <details>
 <summary>Tech stack</summary>
