@@ -131,6 +131,7 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 						changePercent={changePercent}
 						spotPrice={price}
 						source={item?.source}
+						type={type}
 					/>
 
 					{/* Stats grid */}

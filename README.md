@@ -6,7 +6,7 @@ Market-watching hub. Running most of the day on my spare desktop screen.
 
 Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, live financial feeds in a clean UI.
 
-[Features](#features) ⋅ [Tracked assets](#tracked-assets) ⋅ [Deploy your own](#quickstart)
+[Features](#features) ⋅ [Tracked items](#tracked-items) ⋅ [Deploy your own](#quickstart)
 
 ![Dashboard](/assets/ss-dashboard.png)
 
@@ -28,19 +28,19 @@ Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, 
 
 **Tips slideshow** — rotating tips in the sidebar for discoverability
 
-### Tracked Assets
+### Tracked Items
 
-| Asset          | How to search          | Example                                                                              |
-| :------------- | :--------------------- | :----------------------------------------------------------------------------------- |
-| Stock          | Company name or ticker | `AAPL`, `SNN.RO`                                                                     |
-| ETF            | Fund name or ticker    | `VWCE.DE`, `SPY`                                                                     |
-| Index          | Index name or ticker   | `^GSPC`, `^DJI` — Yahoo prefixes with `^`                                            |
-| Crypto         | Coin name              | `BTC-USD`, `ETH-USD` — pairs with USD                                                |
-| Future         | Futures symbol         | `ES=F`, `GC=F` — Yahoo suffixes with `=F`                                            |
-| Bond / Fund    | Fund name or ticker    | `VBTLX` — mutual funds shown as bonds                                                |
-| Option (stock) | Option ticker          | `TSLA250321C00250000` — `<Ticker><YYMMDD><C\|P><00Price00>`                          |
-| Deribit option | "Deribit" + ticker     | `Deribit ETH_USDC-26JUN26-5000-C` — `Deribit <Ticker>_USDC-<DDMMMYY>-<Price>-<C\|P>` |
-| Live feed      | "Bloomberg" or "Yahoo" | YouTube embed in grid                                                                |
+| Asset           | How to search          | Example                                                                              |
+| :-------------- | :--------------------- | :----------------------------------------------------------------------------------- |
+| Stock           | Company name or ticker | `AAPL`, `SNN.RO`                                                                     |
+| ETF             | Fund name or ticker    | `VWCE.DE`, `SPY`                                                                     |
+| Index           | Index name or ticker   | `^GSPC`, `^DJI` — Yahoo prefixes with `^`                                            |
+| Crypto          | Coin name              | `BTC-USD`, `ETH-USD` — pairs with USD                                                |
+| Future          | Futures symbol         | `ES=F`, `GC=F` — Yahoo suffixes with `=F`                                            |
+| Bond / Fund     | Fund name or ticker    | `VBTLX` — mutual funds shown as bonds                                                |
+| Option (stock)  | Option ticker          | `TSLA250321C00250000` — `<Ticker><YYMMDD><C\|P><00Price00>`                          |
+| Option (crypto) | "Deribit" + ticker     | `Deribit ETH_USDC-26JUN26-5000-C` — `Deribit <Ticker>_USDC-<DDMMMYY>-<Price>-<C\|P>` |
+| Live feed       | "Bloomberg" or "Yahoo" | YouTube embed in grid                                                                |
 
 ## Quickstart
 
