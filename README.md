@@ -30,17 +30,16 @@ Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, 
 
 ### Tracked Items
 
-| Asset           | How to search          | Example                                                                              |
-| :-------------- | :--------------------- | :----------------------------------------------------------------------------------- |
-| Stock           | Company name or ticker | `AAPL`, `SNN.RO`                                                                     |
-| ETF             | Fund name or ticker    | `VWCE.DE`, `SPY`                                                                     |
-| Index           | Index name or ticker   | `^GSPC`, `^DJI` — Yahoo prefixes with `^`                                            |
-| Crypto          | Coin name              | `BTC-USD`, `ETH-USD` — pairs with USD                                                |
-| Future          | Futures symbol         | `ES=F`, `GC=F` — Yahoo suffixes with `=F`                                            |
-| Bond / Fund     | Fund name or ticker    | `VBTLX` — mutual funds shown as bonds                                                |
-| Option (stock)  | Option ticker          | `TSLA250321C00250000` — `<Ticker><YYMMDD><C\|P><00Price00>`                          |
-| Option (crypto) | "Deribit" + ticker     | `Deribit ETH_USDC-26JUN26-5000-C` — `Deribit <Ticker>_USDC-<DDMMMYY>-<Price>-<C\|P>` |
-| Live feed       | "Bloomberg" or "Yahoo" | YouTube embed in grid                                                                |
+| Asset           | How to search          | Example                                                     | Preview                                                     |
+| :-------------- | :--------------------- | :---------------------------------------------------------- | :---------------------------------------------------------- |
+| Stock           | Company name or ticker | `AAPL`, `SNN.RO`                                            | <img src="./assets/cards/stock.png" height="64" />          |
+| ETF             | Fund name or ticker    | `VWCE.DE`, `SPY`                                            | <img src="./assets/cards/etf.png" height="64" />            |
+| Index           | Index name or ticker   | `^GSPC`, `^DJI` — Yahoo prefixes with `^`                   | <img src="./assets/cards/index.png" height="64" />          |
+| Crypto          | Coin name              | `BTC-USD`, `ETH-USD` — pairs with USD                       | <img src="./assets/cards/crypto.png" height="64" />         |
+| Future          | Futures symbol         | `ES=F`, `GC=F` — Yahoo suffixes with `=F`                   | <img src="./assets/cards/future.png" height="64" />         |
+| Option (stock)  | Option ticker          | `TSLA250321C00250000` — `<Ticker><YYMMDD><C\|P><00Price00>` | <img src="./assets/cards/option-stock.png" height="64" />   |
+| Option (crypto) | "Deribit" + ticker     | `Deribit <Ticker>_USDC-<DDMMMYY>-<Price>-<C\|P>`            | <img src="./assets/cards/option-deribit.png" height="64" /> |
+| Live feed       | "Bloomberg" or "Yahoo" | YouTube embed in grid                                       | <img src="./assets/cards/embed.png" height="64" />          |
 
 ## Quickstart
 
@@ -68,7 +67,7 @@ Deploy your own copy of Intel to Vercel in one click.
 | Layer        | Tech                                                                   |
 | :----------- | :--------------------------------------------------------------------- |
 | Framework    | Next.js 16 (with `use cache`, new React 19 directives)                 |
-| UI           | Tailwind CSS 4, shadcn components, Lucide icons                        |
+| UI           | Tailwind CSS 4, Base UI primitives, Lucide icons                       |
 | Charts       | [Liveline](https://benji.org/liveline)                                 |
 | Animations   | Framer Motion                                                          |
 | State        | Zustand, TanStack Query                                                |
@@ -76,7 +75,7 @@ Deploy your own copy of Intel to Vercel in one click.
 | Dev tooling  | [Agentation](https://agentation.dev/), Biome, TypeScript 5             |
 | Runtime      | Bun                                                                    |
 | Architecture | FSD                                                                    |
-| AI           | Claude with Claude Code                                                |
+| AI           | Claude, Codex                                                          |
 
 </details>
 
