@@ -1,8 +1,8 @@
 "use client";
 
 import { useEarnings } from "@/entities/asset/api/queries";
-import type { EarningsEvent } from "@/entities/asset/model/types";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
+import { getUpcomingCPI } from "@/shared/lib/cpi";
 import { getUpcomingFOMC } from "@/shared/lib/fomc";
 import { Dialog } from "@/shared/ui/Dialog";
 import { Calendar, X } from "lucide-react";
@@ -23,6 +23,7 @@ function formatRelativeDate(dateStr: string, now: Date): string {
 
 	if (diffDays === 0) return "Today";
 	if (diffDays === 1) return "Tomorrow";
+	if (diffDays < 0) return `${-diffDays}d ago`;
 	return `in ${diffDays}d`;
 }
 
@@ -31,6 +32,27 @@ function formatDate(dateStr: string, includeYear = false): string {
 	const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
 	if (includeYear) options.year = "numeric";
 	return d.toLocaleDateString("en-US", options);
+}
+
+function formatDateRange(start: string, end: string | undefined, includeYear = false): string {
+	if (!end || end === start) return formatDate(start, includeYear);
+	const startD = new Date(`${start}T00:00:00`);
+	const endD = new Date(`${end}T00:00:00`);
+	const sameMonth =
+		startD.getMonth() === endD.getMonth() && startD.getFullYear() === endD.getFullYear();
+	if (sameMonth) {
+		const head = startD.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+		const tail = endD.toLocaleDateString("en-US", { day: "numeric" });
+		return includeYear ? `${head}–${tail}, ${endD.getFullYear()}` : `${head}–${tail}`;
+	}
+	const head = startD.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+	const tail = endD.toLocaleDateString(
+		"en-US",
+		includeYear
+			? { month: "short", day: "numeric", year: "numeric" }
+			: { month: "short", day: "numeric" },
+	);
+	return `${head} – ${tail}`;
 }
 
 function hourLabel(hour: string): string {
@@ -45,6 +67,14 @@ function hourLabel(hour: string): string {
 			return "";
 	}
 }
+
+type InlineItem = {
+	key: string;
+	label: string;
+	date: string;
+	endDate?: string;
+	hour?: string;
+};
 
 export function EventsPanel() {
 	const items = useWatchlistStore((s) => s.items);
@@ -66,19 +96,36 @@ export function EventsPanel() {
 
 	const allFOMC = useMemo(() => (now ? getUpcomingFOMC(now) : []), [now]);
 
-	// Inline list: up to 5 earnings + next FOMC, sorted by date
+	const nextCPI = useMemo(() => {
+		if (!now) return null;
+		const upcoming = getUpcomingCPI(now);
+		return upcoming[0] ?? null;
+	}, [now]);
+
+	const allCPI = useMemo(() => (now ? getUpcomingCPI(now) : []), [now]);
+
+	// Inline list: up to 5 earnings + next FOMC + next CPI, sorted by date
 	const inlineItems = useMemo(() => {
-		const items: Array<{ key: string; label: string; date: string; hour?: string }> = [];
+		const items: InlineItem[] = [];
 		for (const e of sortedEarnings.slice(0, 5)) {
-			items.push({ key: `earn-${e.symbol}`, label: e.symbol, date: e.date, hour: e.hour });
+			items.push({
+				key: `earn-${e.symbol}`,
+				label: e.symbol,
+				date: e.date,
+				endDate: e.endDate,
+				hour: e.hour,
+			});
 		}
 		if (nextFOMC) {
 			items.push({ key: "fomc-next", label: "FOMC", date: nextFOMC.date });
 		}
+		if (nextCPI) {
+			items.push({ key: "cpi-next", label: "CPI", date: nextCPI.date });
+		}
 		return items.sort((a, b) => a.date.localeCompare(b.date));
-	}, [sortedEarnings, nextFOMC]);
+	}, [sortedEarnings, nextFOMC, nextCPI]);
 
-	const totalCount = sortedEarnings.length + allFOMC.length;
+	const totalCount = sortedEarnings.length + allFOMC.length + allCPI.length;
 
 	if (!now || inlineItems.length === 0) {
 		return (
@@ -115,7 +162,14 @@ export function EventsPanel() {
 			</div>
 			<div className="space-y-1">
 				{inlineItems.map((e) => (
-					<EventRow key={e.key} label={e.label} date={e.date} hour={e.hour} now={now} />
+					<EventRow
+						key={e.key}
+						label={e.label}
+						date={e.date}
+						endDate={e.endDate}
+						hour={e.hour}
+						now={now}
+					/>
 				))}
 			</div>
 
@@ -145,6 +199,7 @@ export function EventsPanel() {
 										key={`dialog-earn-${e.symbol}`}
 										label={e.symbol}
 										date={e.date}
+										endDate={e.endDate}
 										hour={e.hour}
 										now={now}
 									/>
@@ -153,7 +208,7 @@ export function EventsPanel() {
 						)}
 					</div>
 
-					{/* Events section */}
+					{/* FOMC section */}
 					<div>
 						<h3 className="text-[10px] uppercase font-bold text-zinc-500 mb-2">FOMC Meetings</h3>
 						{allFOMC.length === 0 ? (
@@ -172,6 +227,26 @@ export function EventsPanel() {
 							</div>
 						)}
 					</div>
+
+					{/* CPI section */}
+					<div>
+						<h3 className="text-[10px] uppercase font-bold text-zinc-500 mb-2">CPI Releases</h3>
+						{allCPI.length === 0 ? (
+							<p className="text-[11px] text-zinc-600">No upcoming releases</p>
+						) : (
+							<div className="space-y-1">
+								{allCPI.map((c) => (
+									<EventRow
+										key={`dialog-cpi-${c.date}`}
+										label="CPI"
+										date={c.date}
+										now={now}
+										includeYear
+									/>
+								))}
+							</div>
+						)}
+					</div>
 				</div>
 			</Dialog>
 		</div>
@@ -181,17 +256,26 @@ export function EventsPanel() {
 function EventRow({
 	label,
 	date,
+	endDate,
 	hour,
 	now,
 	includeYear,
-}: { label: string; date: string; hour?: string; now: Date; includeYear?: boolean }) {
-	const relative = formatRelativeDate(date, now);
+}: {
+	label: string;
+	date: string;
+	endDate?: string;
+	hour?: string;
+	now: Date;
+	includeYear?: boolean;
+}) {
+	// Relative label tracks the latest day in a window so a window-in-progress still reads "Today".
+	const relative = formatRelativeDate(endDate ?? date, now);
 	const isImminent = relative === "Today" || relative === "Tomorrow";
 
 	return (
 		<div className="grid grid-cols-[5rem_1fr_1.75rem_auto] items-center gap-x-2 text-[11px]">
 			<span className="font-medium text-zinc-300 truncate">{label}</span>
-			<span className="text-zinc-500">{formatDate(date, includeYear)}</span>
+			<span className="text-zinc-500">{formatDateRange(date, endDate, includeYear)}</span>
 			{hour && hourLabel(hour) ? (
 				<span className="text-[9px] rounded bg-zinc-800 px-1 py-0.5 text-zinc-500 text-center">
 					{hourLabel(hour)}

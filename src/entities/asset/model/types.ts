@@ -57,7 +57,8 @@ export interface OptionContract {
 
 export interface EarningsEvent {
 	symbol: string;
-	date: string; // YYYY-MM-DD
+	date: string; // YYYY-MM-DD, earliest day in window
+	endDate?: string; // YYYY-MM-DD, latest day if Yahoo returns a 2-day window
 	epsEstimate: number | null;
 	hour: "bmo" | "amc" | "dmh" | "";
 }
