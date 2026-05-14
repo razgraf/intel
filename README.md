@@ -73,6 +73,7 @@ Deploy your own copy of Intel to Vercel in one click.
 | UI           | Tailwind CSS 4, Base UI primitives, Lucide icons                                                                                                |
 | Charts       | [Liveline](https://benji.org/liveline)                                                                                                          |
 | Numbers      | [Caligraph](https://calligraph.raphaelsalaja.com/), [Number Flow](https://number-flow.barvian.me/), [Chrono](https://github.com/wanasit/chrono) |
+| Abstract UI  | [Border Beam](https://beam.jakubantalikcom/)                                                                                                    |
 | Animations   | Framer Motion                                                                                                                                   |
 | State        | Zustand, TanStack Query                                                                                                                         |
 | Data         | Yahoo Finance via `yahoo-finance2`, USDC-settled options via `deribit`                                                                          |

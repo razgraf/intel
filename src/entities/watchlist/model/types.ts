@@ -17,6 +17,7 @@ export interface WatchlistItem {
 	type?: AssetType | "Embed" | "Countdown";
 	currency?: string;
 	futuresTicker?: string;
+	isin?: string;
 	notes?: string;
 	embed?: EmbedConfig;
 	countdown?: CountdownConfig;

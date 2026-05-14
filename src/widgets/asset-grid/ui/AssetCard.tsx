@@ -8,11 +8,13 @@ import {
 import { useChart, useQuotes } from "@/entities/asset/api/queries";
 import { inferAssetType } from "@/entities/asset/model/types";
 import { useChartPreferencesStore } from "@/entities/chart-preferences/model/store";
+import { isIsinCompatible } from "@/entities/watchlist/model/helpers";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { TimeframeSelector } from "@/features/chart-timeframe/ui/TimeframeSelector";
 import { ExternalLinks } from "@/features/external-links/ui/ExternalLinks";
 import { ASSET_TYPE_COLORS, TIMEFRAME_INTERVALS } from "@/shared/lib/constants";
 import { formatPrice } from "@/shared/lib/format";
+import { IsinBadge } from "@/shared/ui/IsinBadge";
 import { Liveline } from "liveline";
 import { Expand } from "lucide-react";
 import { useMemo } from "react";
@@ -141,6 +143,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 					<span className="flex items-center gap-1 rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-zinc-400">
 						{currencyLabel}
 					</span>
+					{item.isin && isIsinCompatible(item) && <IsinBadge isin={item.isin} />}
 					{isDeribit && (
 						<span className="flex items-center gap-1 rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-emerald-400">
 							Deribit

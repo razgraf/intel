@@ -3,10 +3,12 @@
 import { useDeribitQuotes } from "@/entities/asset/api/deribit-queries";
 import { useOptions, useQuotes } from "@/entities/asset/api/queries";
 import { inferAssetType } from "@/entities/asset/model/types";
+import { isIsinCompatible } from "@/entities/watchlist/model/helpers";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { ExternalLinks } from "@/features/external-links/ui/ExternalLinks";
 import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
 import { formatPercent, formatPrice } from "@/shared/lib/format";
+import { IsinBadge } from "@/shared/ui/IsinBadge";
 import { motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { AssetDetailChart } from "./AssetDetailChart";
@@ -96,6 +98,7 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 						<span className="rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-zinc-400 shrink-0">
 							{currency}
 						</span>
+						{item?.isin && isIsinCompatible(item) && <IsinBadge isin={item.isin} />}
 						{isDeribit && (
 							<span className="rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-emerald-400 shrink-0">
 								Deribit
@@ -179,6 +182,14 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 									currency={currency}
 								/>
 								<StatRow label="Volume" value={spotQuote?.regularMarketVolume} isVolume />
+								{item?.isin && isIsinCompatible(item) && (
+									<div className="rounded-lg bg-[#111118] p-3">
+										<span className="text-[11px] text-zinc-500 block">ISIN</span>
+										<span className="text-sm tabular-nums text-zinc-200 break-all">
+											{item.isin}
+										</span>
+									</div>
+								)}
 								{futuresQuote && (
 									<StatRow
 										label={`Futures (${item?.futuresTicker})`}

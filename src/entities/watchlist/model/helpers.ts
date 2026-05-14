@@ -11,3 +11,9 @@ export function isCountdownItem(item: WatchlistItem): boolean {
 export function isSpecialWatchlistItem(item: WatchlistItem): boolean {
 	return isEmbedItem(item) || isCountdownItem(item);
 }
+
+const ISIN_COMPATIBLE_TYPES = new Set(["Stock", "ETF", "Bond", "Index"]);
+
+export function isIsinCompatible(item: WatchlistItem): boolean {
+	return item.type ? ISIN_COMPATIBLE_TYPES.has(item.type) : false;
+}

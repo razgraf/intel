@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearch } from "@/entities/asset/api/queries";
-import { isCountdownItem } from "@/entities/watchlist/model/helpers";
+import { isCountdownItem, isIsinCompatible } from "@/entities/watchlist/model/helpers";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { CountdownDialog } from "@/features/countdown/ui/CountdownDialog";
@@ -19,7 +19,9 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 	const [futuresTicker, setFuturesTicker] = useState(item.futuresTicker ?? "");
 	const [futuresQuery, setFuturesQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
+	const [isin, setIsin] = useState(item.isin ?? "");
 	const [notes, setNotes] = useState(item.notes ?? "");
+	const showIsinField = isIsinCompatible(item);
 
 	useEffect(() => {
 		const timer = setTimeout(() => setDebouncedQuery(futuresQuery), 300);
@@ -31,6 +33,7 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 	function handleOpen(e: React.MouseEvent) {
 		e.stopPropagation();
 		setFuturesTicker(item.futuresTicker ?? "");
+		setIsin(item.isin ?? "");
 		setNotes(item.notes ?? "");
 		setFuturesQuery("");
 		setDebouncedQuery("");
@@ -44,6 +47,7 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 	function handleSave() {
 		update(item.ticker, {
 			futuresTicker: futuresTicker || undefined,
+			isin: showIsinField ? isin.trim() || undefined : item.isin,
 			notes: notes || undefined,
 		});
 		handleClose();
@@ -161,6 +165,24 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 							)}
 						</div>
 					</div>
+
+					{/* ISIN */}
+					{showIsinField && (
+						<div className="space-y-1.5">
+							<span className="text-[10px] uppercase tracking-wider text-zinc-500 block">ISIN</span>
+							<p className="text-[11px] text-zinc-500 leading-tight">
+								12-char identifier (e.g. US88160R1014) — first 2 chars are the country code.
+							</p>
+							<input
+								type="text"
+								value={isin}
+								onChange={(e) => setIsin(e.target.value.toUpperCase())}
+								maxLength={12}
+								placeholder="e.g. US88160R1014"
+								className="w-full rounded-lg bg-[#1e1e2e] px-2.5 py-1.5 text-xs tabular-nums text-zinc-100 outline-none placeholder:text-zinc-500 focus:ring-1 focus:ring-zinc-600"
+							/>
+						</div>
+					)}
 
 					{/* Notes */}
 					<div className="space-y-1.5">

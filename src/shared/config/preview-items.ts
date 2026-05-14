@@ -6,6 +6,7 @@ export const PREVIEW_ITEMS: WatchlistItem[] = [
 		label: "Tesla",
 		type: "Stock",
 		currency: "USD",
+		isin: "US88160R1014",
 	},
 	{
 		ticker: "^SPX",
@@ -32,6 +33,7 @@ export const PREVIEW_ITEMS: WatchlistItem[] = [
 		label: "VWCE",
 		type: "ETF",
 		currency: "EUR",
+		isin: "IE00BK5BQT80",
 	},
 	{
 		ticker: "GC=F",
