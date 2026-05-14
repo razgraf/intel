@@ -43,6 +43,7 @@ Or spin up the app and explore examples on the `/preview` page.
 | Option (crypto) | "Deribit" + ticker     | `Deribit <Ticker>_USDC-<DDMMMYY>-<Price>-<C\|P>` | <img src="./assets/cards/option-deribit.png" height="72" /> |
 | Live feed       | "Bloomberg" or "Yahoo" | YouTube embed in grid                            | <img src="./assets/cards/embed.png" height="72" />          |
 | Countdown       | Countdown              | `May 16th 9PM` or Natural language               | <img src="./assets/cards/countdown.png" height="72" />      |
+| Targets         | "Targets"              | Up to 4 target prices, glow within 2%            | <img src="./assets/cards/targets.png" height="72" />        |
 
 ## Quickstart
 
@@ -89,7 +90,7 @@ Deploy your own copy of Intel to Vercel in one click.
 
 - [x] Deribit options
 - [ ] Polymarket or Kalshi markets
-- [ ] Price alerts and notifications
+- [x] Price alerts (local)
 - [ ] More reliable data sources (Yahoo may rate-limit or be incomplete), maybe Alpha Vantage (?)
 - [ ] More special grid items (keyword trackers, AI-generated market reports, news feeds)
 - [ ] Commercial version with paid subscriptions

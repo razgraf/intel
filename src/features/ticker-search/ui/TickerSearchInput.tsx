@@ -3,7 +3,7 @@
 import { useDeribitPreview, useDeribitSearch } from "@/entities/asset/api/deribit-queries";
 import { useSearch } from "@/entities/asset/api/queries";
 import { inferAssetType } from "@/entities/asset/model/types";
-import { isCountdownItem } from "@/entities/watchlist/model/helpers";
+import { isCountdownItem, isTargetsItem } from "@/entities/watchlist/model/helpers";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
 import { SPECIAL_ITEMS } from "@/shared/lib/special-items";
@@ -139,7 +139,7 @@ export function TickerSearchInput({
 									<button
 										type="button"
 										onClick={() => {
-											if (isCountdownItem(item)) {
+											if (isCountdownItem(item) || isTargetsItem(item)) {
 												onConfigureSpecial?.(item);
 											} else {
 												onSelect(item);

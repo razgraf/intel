@@ -68,4 +68,17 @@ export const PREVIEW_ITEMS: WatchlistItem[] = [
 			url: "https://www.youtube.com/watch?v=iEpJwprxDdk",
 		},
 	},
+	{
+		ticker: "targets-preview",
+		label: "Targets",
+		type: "Targets",
+		source: "targets",
+		targets: {
+			rows: [
+				{ ticker: "AAPL", price: 298 },
+				{ ticker: "BTC-USD", price: 82000 },
+				{ ticker: "DNN", price: 20 },
+			],
+		},
+	},
 ];

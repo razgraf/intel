@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+export PATH="$PROJECT_ROOT/node_modules/.bin:$PATH"
+
 OUTDIR="assets/cards"
 URL="http://localhost:3100/preview"
 SESSION="screenshot-previews-$$"

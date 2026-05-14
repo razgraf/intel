@@ -1,10 +1,15 @@
 "use client";
 
 import { useSearch } from "@/entities/asset/api/queries";
-import { isCountdownItem, isIsinCompatible } from "@/entities/watchlist/model/helpers";
+import {
+	isCountdownItem,
+	isIsinCompatible,
+	isTargetsItem,
+} from "@/entities/watchlist/model/helpers";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { CountdownDialog } from "@/features/countdown/ui/CountdownDialog";
+import { TargetsDialog } from "@/features/targets/ui/TargetsDialog";
 import { Dialog } from "@/shared/ui/Dialog";
 import { Search, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -51,6 +56,32 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 			notes: notes || undefined,
 		});
 		handleClose();
+	}
+
+	if (isTargetsItem(item)) {
+		return (
+			<>
+				<button
+					type="button"
+					onClick={(e) => {
+						e.stopPropagation();
+						setOpen(true);
+					}}
+					className="rounded p-0.5 text-zinc-600 hover:bg-zinc-800 hover:text-zinc-300 transition-colors"
+				>
+					<Settings className="h-3 w-3" />
+				</button>
+				<TargetsDialog
+					open={open}
+					onClose={handleClose}
+					initialRows={item.targets?.rows ?? []}
+					title="Edit Targets"
+					onSave={(rows) => {
+						update(item.ticker, { targets: { rows } });
+					}}
+				/>
+			</>
+		);
 	}
 
 	if (isCountdownItem(item)) {

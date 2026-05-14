@@ -21,8 +21,8 @@ export function CountdownCard({ item }: CountdownCardProps) {
 	const status = target ? getCountdownStatus(target, now) : null;
 	const clockParts = useMemo(() => {
 		if (!status || status.mode !== "clock") return null;
-		const [hours = 0, minutes = 0, seconds = 0] = status.primary.split(":").map(Number);
-		return { hours, minutes, seconds };
+		const [days = 0, hours = 0, minutes = 0, seconds = 0] = status.primary.split(":").map(Number);
+		return { days, hours, minutes, seconds };
 	}, [status]);
 
 	useEffect(() => {
@@ -67,6 +67,12 @@ export function CountdownCard({ item }: CountdownCardProps) {
 							) : status.mode === "clock" && clockParts ? (
 								<NumberFlowGroup>
 									<div className="flex items-center gap-1.5">
+										<NumberFlow
+											value={clockParts.days}
+											willChange
+											format={{ minimumIntegerDigits: 2, maximumFractionDigits: 0 }}
+										/>
+										<span className="text-zinc-500">:</span>
 										<NumberFlow
 											value={clockParts.hours}
 											willChange

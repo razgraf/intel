@@ -6,6 +6,7 @@ import { inferAssetType } from "@/entities/asset/model/types";
 import { isIsinCompatible } from "@/entities/watchlist/model/helpers";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { ExternalLinks } from "@/features/external-links/ui/ExternalLinks";
+import { ItemSettingsPopover } from "@/features/item-settings/ui/ItemSettingsPopover";
 import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
 import { formatPercent, formatPrice } from "@/shared/lib/format";
 import { IsinBadge } from "@/shared/ui/IsinBadge";
@@ -108,13 +109,16 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 							<span className="text-sm text-zinc-500 truncate">{spotQuote.shortName}</span>
 						)}
 					</div>
-					<button
-						type="button"
-						onClick={onClose}
-						className="rounded-lg p-1 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
-					>
-						<X className="h-5 w-5" />
-					</button>
+					<div className="flex items-center gap-1 shrink-0">
+						{item && <ItemSettingsPopover item={item} />}
+						<button
+							type="button"
+							onClick={onClose}
+							className="rounded-lg p-1 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+						>
+							<X className="h-5 w-5" />
+						</button>
+					</div>
 				</div>
 
 				<div className="p-4 space-y-6">

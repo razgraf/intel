@@ -2,11 +2,17 @@
 
 import { useDeribitQuotes } from "@/entities/asset/api/deribit-queries";
 import { useQuotes } from "@/entities/asset/api/queries";
-import { isCountdownItem, isSpecialWatchlistItem } from "@/entities/watchlist/model/helpers";
+import {
+	isCountdownItem,
+	isSpecialWatchlistItem,
+	isTargetsItem,
+} from "@/entities/watchlist/model/helpers";
 import { useWatchlistHydrated, useWatchlistStore } from "@/entities/watchlist/model/store";
 import { CountdownDialog } from "@/features/countdown/ui/CountdownDialog";
+import { TargetsDialog } from "@/features/targets/ui/TargetsDialog";
 import { TickerSearchInput } from "@/features/ticker-search/ui/TickerSearchInput";
 import { createCountdownItem } from "@/shared/lib/countdown";
+import { createTargetsItem } from "@/shared/lib/targets";
 import { Reorder } from "framer-motion";
 import { useState } from "react";
 import { WatchlistRow } from "./WatchlistRow";
@@ -21,8 +27,10 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 	const hydrated = useWatchlistHydrated();
 	const items = useWatchlistStore((s) => s.items);
 	const add = useWatchlistStore((s) => s.add);
+	const update = useWatchlistStore((s) => s.update);
 	const reorder = useWatchlistStore((s) => s.reorder);
 	const [countdownOpen, setCountdownOpen] = useState(false);
+	const [targetsOpen, setTargetsOpen] = useState(false);
 
 	const yahooTickers = items
 		.filter((i) => i.source !== "deribit" && !isSpecialWatchlistItem(i))
@@ -47,6 +55,8 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 					onConfigureSpecial={(item) => {
 						if (isCountdownItem(item)) {
 							setCountdownOpen(true);
+						} else if (isTargetsItem(item)) {
+							setTargetsOpen(true);
 						}
 					}}
 					placeholder="Add ticker or special card..."
@@ -87,6 +97,20 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 					setCountdownOpen(false);
 				}}
 				title="New Countdown"
+			/>
+			<TargetsDialog
+				open={targetsOpen}
+				onClose={() => setTargetsOpen(false)}
+				initialRows={[]}
+				title="New Targets Card"
+				onSave={(rows) => {
+					const created = createTargetsItem();
+					add(created);
+					if (rows.length > 0) {
+						update(created.ticker, { targets: { rows } });
+					}
+					setTargetsOpen(false);
+				}}
 			/>
 		</div>
 	);

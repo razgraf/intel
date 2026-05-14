@@ -31,7 +31,18 @@ export const useWatchlistStore = create<WatchlistState>()(
 				}),
 			remove: (ticker) =>
 				set((state) => ({
-					items: state.items.filter((i) => i.ticker !== ticker),
+					items: state.items
+						.filter((i) => i.ticker !== ticker)
+						.map((i) =>
+							i.type === "Targets" && i.targets
+								? {
+										...i,
+										targets: {
+											rows: i.targets.rows.filter((r) => r.ticker !== ticker),
+										},
+									}
+								: i,
+						),
 				})),
 			update: (ticker, patch) =>
 				set((state) => ({

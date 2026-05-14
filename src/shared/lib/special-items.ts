@@ -8,6 +8,12 @@ export const SPECIAL_ITEMS: WatchlistItem[] = [
 		source: "countdown",
 	},
 	{
+		ticker: "targets",
+		label: "Targets",
+		type: "Targets",
+		source: "targets",
+	},
+	{
 		ticker: "bloomberg-live",
 		label: "Bloomberg Live",
 		type: "Embed",

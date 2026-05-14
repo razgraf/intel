@@ -43,6 +43,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "agent-browser": "^0.27.0",
     "agentation": "^2.3.3",
     "tailwindcss": "^4",
     "typescript": "^5"

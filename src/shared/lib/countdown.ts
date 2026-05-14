@@ -7,7 +7,7 @@ const MINUTE_MS = 60 * SECOND_MS;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
-export const COUNTDOWN_CLOCK_THRESHOLD_MS = 3 * DAY_MS;
+export const COUNTDOWN_CLOCK_THRESHOLD_MS = 30 * DAY_MS;
 
 const FRIENDLY_TIMEZONE_REPLACEMENTS: Array<[RegExp, string]> = [
 	[/\beastern(?:\s+time)?\b/gi, "ET"],
@@ -97,15 +97,15 @@ export function getCountdownStatus(targetAt: string | Date, now = Date.now()): C
 
 	if (diff < COUNTDOWN_CLOCK_THRESHOLD_MS) {
 		const totalSeconds = Math.max(0, Math.floor(diff / SECOND_MS));
-		const hours = Math.floor(totalSeconds / 3600);
+		const days = Math.floor(totalSeconds / 86_400);
+		const hours = Math.floor((totalSeconds % 86_400) / 3600);
 		const minutes = Math.floor((totalSeconds % 3600) / 60);
 		const seconds = totalSeconds % 60;
+		const pad = (n: number) => n.toString().padStart(2, "0");
 		return {
 			state: "counting",
 			mode: "clock",
-			primary: `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
-				.toString()
-				.padStart(2, "0")}`,
+			primary: `${pad(days)}:${pad(hours)}:${pad(minutes)}:${pad(seconds)}`,
 			secondary: "Remaining",
 		};
 	}

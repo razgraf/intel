@@ -6,6 +6,7 @@ import { PREVIEW_ITEMS } from "@/shared/config/preview-items";
 import { AssetCard } from "@/widgets/asset-grid/ui/AssetCard";
 import { CountdownCard } from "@/widgets/asset-grid/ui/CountdownCard";
 import { EmbedCard } from "@/widgets/asset-grid/ui/EmbedCard";
+import { TargetsCard } from "@/widgets/asset-grid/ui/TargetsCard";
 import { useState } from "react";
 
 export default function PreviewPage() {
@@ -44,6 +45,8 @@ export default function PreviewPage() {
 						<EmbedCard item={activeItem} />
 					) : activeItem.type === "Countdown" ? (
 						<CountdownCard item={activeItem} />
+					) : activeItem.type === "Targets" ? (
+						<TargetsCard item={activeItem} />
 					) : (
 						<AssetCard item={activeItem} />
 					)}

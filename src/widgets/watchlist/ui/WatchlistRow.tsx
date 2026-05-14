@@ -1,10 +1,11 @@
 "use client";
 
 import type { Quote } from "@/entities/asset/model/types";
-import { isCountdownItem, isEmbedItem } from "@/entities/watchlist/model/helpers";
+import { isCountdownItem, isEmbedItem, isTargetsItem } from "@/entities/watchlist/model/helpers";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { ItemSettingsPopover } from "@/features/item-settings/ui/ItemSettingsPopover";
+import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
 import { getCountdownDate, getCountdownStatus } from "@/shared/lib/countdown";
 import { formatPercent, formatPrice } from "@/shared/lib/format";
 import { Reorder, useDragControls } from "framer-motion";
@@ -30,8 +31,21 @@ export function WatchlistRow({
 	onOpenDetail,
 }: WatchlistRowProps) {
 	const remove = useWatchlistStore((s) => s.remove);
+	const targetsIndex = useWatchlistStore((s) =>
+		isTargetsItem(item)
+			? s.items.filter(isTargetsItem).findIndex((i) => i.ticker === item.ticker)
+			: -1,
+	);
 	const dragControls = useDragControls();
 	const isDeribit = item.source === "deribit";
+	const targetsLabel = useMemo(() => {
+		if (!isTargetsItem(item)) return null;
+		const tickers = item.targets?.rows.map((r) => r.ticker) ?? [];
+		if (tickers.length === 0) {
+			return `Targets #${targetsIndex >= 0 ? targetsIndex + 1 : 1}`;
+		}
+		return `Targets ${tickers.join(", ")}`;
+	}, [item, targetsIndex]);
 	const price = isDeribit ? (deribitPrice ?? 0) : (quote?.regularMarketPrice ?? 0);
 	const changePercent = isDeribit ? 0 : (quote?.regularMarketChangePercent ?? 0);
 	const isOpen = isDeribit || quote?.marketState === "REGULAR";
@@ -56,7 +70,11 @@ export function WatchlistRow({
 				isSelected ? "bg-[#1e1e2e]" : "hover:bg-[#1e1e2e]/50"
 			}`}
 			onClick={onClick}
-			onDoubleClick={!isEmbedItem(item) && !isCountdownItem(item) ? onOpenDetail : undefined}
+			onDoubleClick={
+				!isEmbedItem(item) && !isCountdownItem(item) && !isTargetsItem(item)
+					? onOpenDetail
+					: undefined
+			}
 			onKeyDown={(e) => e.key === "Enter" && onClick?.()}
 		>
 			<div className="shrink-0 cursor-grab touch-none" onPointerDown={(e) => dragControls.start(e)}>
@@ -85,6 +103,17 @@ export function WatchlistRow({
 					>
 						{countdownStatus?.primary ?? "--"}
 					</span>
+				</>
+			) : isTargetsItem(item) ? (
+				<>
+					<div
+						className="h-1.5 w-1.5 rounded-full shrink-0"
+						style={{ backgroundColor: ASSET_TYPE_COLORS.Targets }}
+					/>
+					<span className="text-xs font-medium text-zinc-200 flex-1 truncate text-left">
+						{targetsLabel}
+					</span>
+					<span className="text-[10px] text-zinc-500">{item.targets?.rows.length ?? 0}/4</span>
 				</>
 			) : (
 				<>
