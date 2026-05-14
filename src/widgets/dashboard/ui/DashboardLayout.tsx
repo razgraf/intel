@@ -58,7 +58,7 @@ export function DashboardLayout() {
 
 	const handleOpenPreview = useCallback(() => {
 		setSettingsOpen(false);
-		window.location.assign("/preview");
+		window.open("/preview", "_blank", "noopener,noreferrer");
 	}, []);
 
 	const handleRestoreConfirm = useCallback(() => {

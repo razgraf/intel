@@ -7,7 +7,7 @@ import type { TargetRow } from "@/entities/watchlist/model/types";
 import { MAX_TARGET_ROWS, adaptiveStep, roundToStep } from "@/shared/lib/targets";
 import { Dialog } from "@/shared/ui/Dialog";
 import { ChevronDown, ChevronUp, Plus, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface TargetsDialogProps {
 	open: boolean;
@@ -40,9 +40,13 @@ export function TargetsDialog({
 	const quoteMap = useMemo(() => new Map(quotes.map((q) => [q.symbol, q])), [quotes]);
 
 	const [rows, setRows] = useState<DraftRow[]>([]);
+	const wasOpenRef = useRef(false);
 
 	useEffect(() => {
-		if (open) setRows(initialRows.map(toDraft));
+		if (open && !wasOpenRef.current) {
+			setRows(initialRows.map(toDraft));
+		}
+		wasOpenRef.current = open;
 	}, [open, initialRows]);
 
 	const usedTickers = new Set(rows.map((r) => r.ticker).filter(Boolean));
@@ -112,7 +116,7 @@ export function TargetsDialog({
 								<select
 									value={row.ticker}
 									onChange={(e) => patchRow(index, { ticker: e.target.value })}
-									className="bg-transparent text-xs text-zinc-100 outline-none max-w-[120px]"
+									className="bg-transparent text-xs text-zinc-100 outline-none max-w-30"
 								>
 									{options.map((opt) => (
 										<option key={opt.ticker} value={opt.ticker} className="bg-[#1e1e2e]">

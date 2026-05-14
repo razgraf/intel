@@ -6,7 +6,7 @@ import { ItemSettingsPopover } from "@/features/item-settings/ui/ItemSettingsPop
 import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
 import { formatPrice } from "@/shared/lib/format";
 import { isWithinThreshold, targetDeviation } from "@/shared/lib/targets";
-import { BorderBeam } from "@/shared/ui/BorderBeam";
+import { BorderBeam } from "border-beam";
 import { useMemo } from "react";
 
 interface TargetsCardProps {
@@ -25,7 +25,7 @@ export function TargetsCard({ item }: TargetsCardProps) {
 	});
 
 	return (
-		<BorderBeam active={anyClose}>
+		<BorderBeam active={anyClose} size="md" theme="dark" colorVariant="colorful" duration={5}>
 			<div className="relative rounded-xl border border-[#1e1e2e] bg-[#111118] p-3 flex flex-col gap-3 h-full">
 				{/* Header */}
 				<div className="flex items-center justify-between">
