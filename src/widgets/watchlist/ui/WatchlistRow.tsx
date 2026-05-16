@@ -8,6 +8,7 @@ import { ItemSettingsPopover } from "@/features/item-settings/ui/ItemSettingsPop
 import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
 import { getCountdownDate, getCountdownStatus } from "@/shared/lib/countdown";
 import { formatPercent, formatPrice } from "@/shared/lib/format";
+import { MAX_TARGET_ROWS } from "@/shared/lib/targets";
 import { Reorder, useDragControls } from "framer-motion";
 import { Clock3 } from "lucide-react";
 import { GripVertical, X } from "lucide-react";
@@ -40,11 +41,16 @@ export function WatchlistRow({
 	const isDeribit = item.source === "deribit";
 	const targetsLabel = useMemo(() => {
 		if (!isTargetsItem(item)) return null;
-		const tickers = item.targets?.rows.map((r) => r.ticker) ?? [];
-		if (tickers.length === 0) {
+		const rows = item.targets?.rows ?? [];
+		if (rows.length === 0) {
 			return `Targets #${targetsIndex >= 0 ? targetsIndex + 1 : 1}`;
 		}
-		return `Targets ${tickers.join(", ")}`;
+		const counts = new Map<string, number>();
+		for (const r of rows) {
+			counts.set(r.ticker, (counts.get(r.ticker) ?? 0) + 1);
+		}
+		const parts = [...counts.entries()].map(([t, n]) => (n > 1 ? `${t} (${n})` : t));
+		return `Targets ${parts.join(", ")}`;
 	}, [item, targetsIndex]);
 	const price = isDeribit ? (deribitPrice ?? 0) : (quote?.regularMarketPrice ?? 0);
 	const changePercent = isDeribit ? 0 : (quote?.regularMarketChangePercent ?? 0);
@@ -113,7 +119,9 @@ export function WatchlistRow({
 					<span className="text-xs font-medium text-zinc-200 flex-1 truncate text-left">
 						{targetsLabel}
 					</span>
-					<span className="text-[10px] text-zinc-500">{item.targets?.rows.length ?? 0}/4</span>
+					<span className="text-[10px] text-zinc-500">
+						{item.targets?.rows.length ?? 0}/{MAX_TARGET_ROWS}
+					</span>
 				</>
 			) : (
 				<>

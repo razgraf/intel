@@ -10,9 +10,12 @@ export interface CountdownConfig {
 	targetAt: string;
 }
 
+export type TargetDirection = "long" | "short";
+
 export interface TargetRow {
 	ticker: string;
 	price: number;
+	direction?: TargetDirection;
 }
 
 export interface TargetsConfig {

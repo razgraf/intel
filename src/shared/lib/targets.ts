@@ -1,7 +1,16 @@
-import type { WatchlistItem } from "@/entities/watchlist/model/types";
+import type { TargetDirection, TargetRow, WatchlistItem } from "@/entities/watchlist/model/types";
 
-export const MAX_TARGET_ROWS = 4;
+export const MAX_TARGET_ROWS = 6;
 export const TARGET_PROXIMITY_THRESHOLD = 0.02;
+
+export function getTargetDirection(row: TargetRow): TargetDirection {
+	return row.direction ?? "long";
+}
+
+export function isTargetHit(current: number, target: number, direction: TargetDirection): boolean {
+	if (!Number.isFinite(current) || !Number.isFinite(target) || target <= 0) return false;
+	return direction === "long" ? current >= target : current <= target;
+}
 
 export function createTargetsTicker(): string {
 	if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
