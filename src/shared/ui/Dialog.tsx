@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { type ReactNode, useEffect } from "react";
 
@@ -7,13 +8,14 @@ interface DialogProps {
 	open: boolean;
 	onClose: () => void;
 	children: ReactNode;
+	className?: string;
 }
 
 const DURATION = 0.2;
 const EXIT_DURATION = DURATION * 0.8;
 const EASING: [number, number, number, number] = [0.23, 1, 0.32, 1]; // ease-out-quint
 
-export function Dialog({ open, onClose, children }: DialogProps) {
+export function Dialog({ open, onClose, children, className }: DialogProps) {
 	const shouldReduceMotion = useReducedMotion();
 
 	useEffect(() => {
@@ -52,7 +54,10 @@ export function Dialog({ open, onClose, children }: DialogProps) {
 
 					{/* Content */}
 					<motion.div
-						className="relative w-full max-w-sm rounded-xl border border-[#1e1e2e] bg-[#111118] shadow-2xl"
+						className={cn(
+							"relative w-full max-w-sm rounded-xl border border-[#1e1e2e] bg-[#111118] shadow-2xl",
+							className,
+						)}
 						initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.95, y: 10 }}
 						animate={{ opacity: 1, scale: 1, y: 0 }}
 						exit={{ opacity: 0, scale: 0.95, y: 10 }}

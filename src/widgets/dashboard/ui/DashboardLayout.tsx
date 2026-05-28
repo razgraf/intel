@@ -2,6 +2,7 @@
 
 import { useChartPreferencesStore } from "@/entities/chart-preferences/model/store";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
+import { AccountDialog } from "@/features/account/ui/AccountDialog";
 import { encodeWatchlist } from "@/features/watchlist-sync/lib/encode";
 import { ImportWatchlistModal } from "@/features/watchlist-sync/ui/ImportWatchlistModal";
 import type { Timeframe } from "@/shared/lib/constants";
@@ -15,7 +16,7 @@ import { MarketHoursPanel } from "@/widgets/market-hours/ui/MarketHoursPanel";
 import { TipsPanel } from "@/widgets/tips/ui/TipsPanel";
 import { WatchlistPanel } from "@/widgets/watchlist/ui/WatchlistPanel";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Check, Link, PanelRight, QrCode, Settings, Upload, X } from "lucide-react";
+import { ArrowUpRight, PanelRight, Settings, User, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -24,7 +25,7 @@ export function DashboardLayout() {
 	const [detailTicker, setDetailTicker] = useState<string | null>(null);
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
-	const [copied, setCopied] = useState(false);
+	const [accountOpen, setAccountOpen] = useState(false);
 	const [qrOpen, setQrOpen] = useState(false);
 	const [restoreOpen, setRestoreOpen] = useState(false);
 	const [restoreUrl, setRestoreUrl] = useState("");
@@ -48,13 +49,6 @@ export function DashboardLayout() {
 		const payload = encodeWatchlist(watchlistItems);
 		return `${window.location.origin}${window.location.pathname}?watchlist=${payload}`;
 	}, [watchlistItems]);
-
-	const handleExport = useCallback(() => {
-		navigator.clipboard.writeText(exportUrl).then(() => {
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
-		});
-	}, [exportUrl]);
 
 	const handleOpenPreview = useCallback(() => {
 		setSettingsOpen(false);
@@ -109,6 +103,14 @@ export function DashboardLayout() {
 					<button
 						type="button"
 						className="ml-1 p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+						onClick={() => setAccountOpen(true)}
+						aria-label="Account"
+					>
+						<User className="h-4 w-4" />
+					</button>
+					<button
+						type="button"
+						className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
 						onClick={() => setSettingsOpen(true)}
 						aria-label="Settings"
 					>
@@ -205,45 +207,6 @@ export function DashboardLayout() {
 					</div>
 
 					<div className="space-y-2">
-						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Export Watchlist</h3>
-						<div className="grid grid-cols-3 gap-2">
-							<button
-								type="button"
-								onClick={handleExport}
-								className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
-							>
-								{copied ? (
-									<>
-										<Check className="h-3.5 w-3.5 text-emerald-400" />
-										Copied!
-									</>
-								) : (
-									<>
-										<Link className="h-3.5 w-3.5" />
-										URL
-									</>
-								)}
-							</button>
-							<button
-								type="button"
-								onClick={() => setQrOpen(true)}
-								className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
-							>
-								<QrCode className="h-3.5 w-3.5" />
-								QR Code
-							</button>
-							<button
-								type="button"
-								onClick={() => setRestoreOpen(true)}
-								className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
-							>
-								<Upload className="h-3.5 w-3.5" />
-								Restore
-							</button>
-						</div>
-					</div>
-
-					<div className="space-y-2">
 						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Reset Time View</h3>
 						<div className="grid grid-cols-3 gap-2">
 							{(["1D", "1W", "1M"] as const).map((tf) => (
@@ -280,6 +243,20 @@ export function DashboardLayout() {
 					</div>
 				</div>
 			</Dialog>
+
+			{/* Account dialog */}
+			<AccountDialog
+				open={accountOpen}
+				onClose={() => setAccountOpen(false)}
+				onOpenQr={() => {
+					setAccountOpen(false);
+					setQrOpen(true);
+				}}
+				onOpenRestore={() => {
+					setAccountOpen(false);
+					setRestoreOpen(true);
+				}}
+			/>
 
 			{/* QR code dialog */}
 			<Dialog open={qrOpen} onClose={() => setQrOpen(false)}>
