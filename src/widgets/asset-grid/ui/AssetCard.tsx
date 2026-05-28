@@ -239,14 +239,31 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 								</span>
 							</div>
 						</div>
-						{futuresQuote && (
+						{spotQuote?.marketState === "PRE" && spotQuote?.preMarketPrice ? (
+							<div className="flex items-center justify-between">
+								<span className="text-[11px] text-zinc-500">Pre-mkt</span>
+								<div className="flex items-center gap-2">
+									{spotQuote.preMarketChangePercent != null && (
+										<span
+											className={`text-[11px] tabular-nums ${spotQuote.preMarketChangePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}
+										>
+											{spotQuote.preMarketChangePercent >= 0 ? "+" : ""}
+											{spotQuote.preMarketChangePercent.toFixed(2)}%
+										</span>
+									)}
+									<span className="text-sm tabular-nums text-zinc-300">
+										{formatPrice(spotQuote.preMarketPrice, spotQuote.currency)}
+									</span>
+								</div>
+							</div>
+						) : futuresQuote ? (
 							<div className="flex items-center justify-between">
 								<span className="text-[11px] text-zinc-500">Futures</span>
 								<span className="text-sm tabular-nums text-zinc-400">
 									{formatPrice(futuresQuote.regularMarketPrice, futuresQuote.currency)}
 								</span>
 							</div>
-						)}
+						) : null}
 					</>
 				)}
 			</div>

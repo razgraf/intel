@@ -201,6 +201,24 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 										currency={futuresQuote.currency}
 									/>
 								)}
+								{spotQuote?.marketState === "PRE" && spotQuote?.preMarketPrice && (
+									<div className="rounded-lg bg-[#111118] p-3">
+										<span className="text-[11px] text-zinc-500 block">Pre-Market</span>
+										<div className="flex items-baseline gap-1.5">
+											<span className="text-sm tabular-nums text-zinc-200">
+												{formatPrice(spotQuote.preMarketPrice, currency)}
+											</span>
+											{spotQuote.preMarketChangePercent != null && (
+												<span
+													className={`text-[10px] tabular-nums ${spotQuote.preMarketChangePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}
+												>
+													{spotQuote.preMarketChangePercent >= 0 ? "+" : ""}
+													{spotQuote.preMarketChangePercent.toFixed(2)}%
+												</span>
+											)}
+										</div>
+									</div>
+								)}
 								{avgIV !== null && (
 									<div className="rounded-lg bg-[#111118] p-3">
 										<span className="text-[11px] text-zinc-500 block">Avg IV (ATM)</span>

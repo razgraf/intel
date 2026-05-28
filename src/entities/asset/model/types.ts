@@ -15,6 +15,9 @@ export interface Quote {
 	marketState: string;
 	exchange: string;
 	quoteType: string;
+	preMarketPrice?: number;
+	preMarketChange?: number;
+	preMarketChangePercent?: number;
 }
 
 export interface HistoricalPoint {

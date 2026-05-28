@@ -16,6 +16,9 @@ interface YFQuote {
 	marketState?: string;
 	exchange?: string;
 	quoteType?: string;
+	preMarketPrice?: number;
+	preMarketChange?: number;
+	preMarketChangePercent?: number;
 }
 
 const CACHE_TTL = 30_000; // 30s
@@ -63,6 +66,9 @@ export async function GET(request: Request) {
 						marketState: q.marketState ?? "CLOSED",
 						exchange: q.exchange ?? "",
 						quoteType: q.quoteType ?? "EQUITY",
+						preMarketPrice: q.preMarketPrice,
+						preMarketChange: q.preMarketChange,
+						preMarketChangePercent: q.preMarketChangePercent,
 					};
 				}
 				console.error(
