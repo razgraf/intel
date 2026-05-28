@@ -1,8 +1,7 @@
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 
 export function encodeWatchlist(items: WatchlistItem[]): string {
-	const stripped = items.map(({ notes, ...rest }) => rest);
-	const json = JSON.stringify(stripped);
+	const json = JSON.stringify(items);
 	const base64 = btoa(json).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 	return base64;
 }

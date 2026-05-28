@@ -5,6 +5,7 @@ import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { AccountDialog } from "@/features/account/ui/AccountDialog";
 import { encodeWatchlist } from "@/features/watchlist-sync/lib/encode";
 import { ImportWatchlistModal } from "@/features/watchlist-sync/ui/ImportWatchlistModal";
+import { cn } from "@/lib/utils";
 import type { Timeframe } from "@/shared/lib/constants";
 import { EXCHANGES, getExchangeStatus } from "@/shared/lib/exchanges";
 import { formatLocalTime, getLocalTimezone } from "@/shared/lib/format";
@@ -15,6 +16,7 @@ import { EventsPanel } from "@/widgets/earnings/ui/EarningsPanel";
 import { MarketHoursPanel } from "@/widgets/market-hours/ui/MarketHoursPanel";
 import { TipsPanel } from "@/widgets/tips/ui/TipsPanel";
 import { WatchlistPanel } from "@/widgets/watchlist/ui/WatchlistPanel";
+import { useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, PanelRight, Settings, User, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -34,6 +36,7 @@ export function DashboardLayout() {
 	const [timezone, setTimezone] = useState("");
 	const watchlistItems = useWatchlistStore((s) => s.items);
 	const resetAllTimeframes = useChartPreferencesStore((s) => s.resetAll);
+	const { isSignedIn } = useUser();
 
 	useEffect(() => {
 		setLocalTime(formatLocalTime(new Date()));
@@ -102,7 +105,12 @@ export function DashboardLayout() {
 					<span>{timezone}</span>
 					<button
 						type="button"
-						className="ml-1 p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+						className={cn(
+							"ml-1 p-1 rounded hover:bg-zinc-800 transition-colors",
+							isSignedIn
+								? "text-emerald-500 hover:text-emerald-400"
+								: "text-zinc-400 hover:text-zinc-200",
+						)}
 						onClick={() => setAccountOpen(true)}
 						aria-label="Account"
 					>

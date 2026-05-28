@@ -1,6 +1,8 @@
+import { CloudSyncProvider } from "@/features/account/ui/CloudSyncProvider";
 import { QueryProvider } from "@/shared/config/query-client";
 import { DevTools } from "@/shared/ui/DevTools";
 import { ProdTools } from "@/shared/ui/ProdTools";
+import { ClerkProvider } from "@clerk/nextjs";
 
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
@@ -28,9 +30,12 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={cn("dark", inter.variable, "font-sans", geist.variable)}>
 			<body className="font-(family-name:--font-inter) antialiased">
-				<QueryProvider>{children}</QueryProvider>
-				<ProdTools />
-				<DevTools />
+				<ClerkProvider>
+					<QueryProvider>{children}</QueryProvider>
+					<CloudSyncProvider />
+					<ProdTools />
+					<DevTools />
+				</ClerkProvider>
 			</body>
 		</html>
 	);

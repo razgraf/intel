@@ -68,26 +68,28 @@ Deploy your own copy of Intel to Vercel in one click.
 <details>
 <summary>Tech stack</summary>
 
-| Layer        | Tech                                                                                                                                            |
-| :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework    | Next.js 16 (with `use cache`, new React 19 directives)                                                                                          |
-| UI           | Tailwind CSS 4, Base UI primitives, Lucide icons                                                                                                |
-| Charts       | [Liveline](https://benji.org/liveline)                                                                                                          |
-| Numbers      | [Caligraph](https://calligraph.raphaelsalaja.com/), [Number Flow](https://number-flow.barvian.me/), [Chrono](https://github.com/wanasit/chrono) |
-| Abstract UI  | [Border Beam](https://beam.jakubantalikcom/)                                                                                                    |
-| Animations   | Framer Motion                                                                                                                                   |
-| State        | Zustand, TanStack Query                                                                                                                         |
-| Data         | Yahoo Finance via `yahoo-finance2`, USDC-settled options via `deribit`                                                                          |
-| Dev tooling  | [Agentation](https://agentation.dev/), Biome, TypeScript 5                                                                                      |
-| Runtime      | Bun                                                                                                                                             |
-| Architecture | FSD                                                                                                                                             |
-| AI           | Claude, Codex                                                                                                                                   |
+| Layer             | Tech                                                                                                                                            |
+| :---------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework         | Next.js 16 (with `use cache`, new React 19 directives)                                                                                          |
+| UI                | Tailwind CSS 4, Base UI primitives, Lucide icons                                                                                                |
+| Charts            | [Liveline](https://benji.org/liveline)                                                                                                          |
+| Numbers           | [Caligraph](https://calligraph.raphaelsalaja.com/), [Number Flow](https://number-flow.barvian.me/), [Chrono](https://github.com/wanasit/chrono) |
+| Abstract UI       | [Border Beam](https://beam.jakubantalikcom/)                                                                                                    |
+| Animations        | Framer Motion                                                                                                                                   |
+| State             | Zustand, TanStack Query                                                                                                                         |
+| Data              | Yahoo Finance via `yahoo-finance2`, USDC-settled options via `deribit`                                                                          |
+| Dev tooling       | [Agentation](https://agentation.dev/), Biome, TypeScript 5                                                                                      |
+| Accounts and data | [Clerk](clerk.com), [Upstash Redis](upstash.com)                                                                                                |
+| Runtime           | Bun                                                                                                                                             |
+| Architecture      | FSD                                                                                                                                             |
+| AI                | Claude, Codex                                                                                                                                   |
 
 </details>
 
 <details>
 <summary>Roadmap</summary>
 
+- [x] Accounts alongside anonymous lists
 - [x] Deribit options
 - [ ] Polymarket or Kalshi markets
 - [x] Price alerts (local)

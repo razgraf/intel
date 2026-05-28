@@ -13,7 +13,7 @@ interface WatchlistState {
 	reorder: (items: WatchlistItem[]) => void;
 }
 
-const DEFAULT_WATCHLIST: WatchlistItem[] = [
+export const DEFAULT_WATCHLIST: WatchlistItem[] = [
 	{ ticker: "AAPL", label: "Apple", type: "Stock", currency: "USD" },
 	{ ticker: "VWCE.DE", label: "VWCE", type: "ETF", currency: "EUR" },
 	{ ticker: "BTC-USD", label: "Bitcoin", type: "Crypto", currency: "USD" },
