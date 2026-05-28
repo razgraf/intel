@@ -1,5 +1,7 @@
 import { CloudSyncProvider } from "@/features/account/ui/CloudSyncProvider";
 import { QueryProvider } from "@/shared/config/query-client";
+import { isAccountsEnabled } from "@/shared/lib/accounts-config";
+import { AccountsContextProvider } from "@/shared/lib/accounts-context";
 import { DevTools } from "@/shared/ui/DevTools";
 import { ProdTools } from "@/shared/ui/ProdTools";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -27,15 +29,23 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const accountsEnabled = isAccountsEnabled();
+
+	const inner = (
+		<>
+			<QueryProvider>{children}</QueryProvider>
+			<CloudSyncProvider />
+			<ProdTools />
+			<DevTools />
+		</>
+	);
+
 	return (
 		<html lang="en" className={cn("dark", inter.variable, "font-sans", geist.variable)}>
 			<body className="font-(family-name:--font-inter) antialiased">
-				<ClerkProvider>
-					<QueryProvider>{children}</QueryProvider>
-					<CloudSyncProvider />
-					<ProdTools />
-					<DevTools />
-				</ClerkProvider>
+				<AccountsContextProvider enabled={accountsEnabled}>
+					{accountsEnabled ? <ClerkProvider>{inner}</ClerkProvider> : inner}
+				</AccountsContextProvider>
 			</body>
 		</html>
 	);

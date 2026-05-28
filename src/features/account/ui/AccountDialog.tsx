@@ -2,6 +2,7 @@
 
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { encodeWatchlist } from "@/features/watchlist-sync/lib/encode";
+import { useAccountsEnabled } from "@/shared/lib/accounts-context";
 import { Dialog } from "@/shared/ui/Dialog";
 import { Show, SignInButton, SignOutButton, SignUpButton, useUser } from "@clerk/nextjs";
 import { Check, Link, LogIn, LogOut, QrCode, Upload, UserPlus, X } from "lucide-react";
@@ -16,7 +17,7 @@ interface AccountDialogProps {
 
 export function AccountDialog({ open, onClose, onOpenQr, onOpenRestore }: AccountDialogProps) {
 	const watchlistItems = useWatchlistStore((s) => s.items);
-	const { user } = useUser();
+	const accountsEnabled = useAccountsEnabled();
 	const [copied, setCopied] = useState(false);
 
 	const exportUrl = useMemo(() => {
@@ -93,70 +94,113 @@ export function AccountDialog({ open, onClose, onOpenQr, onOpenRestore }: Accoun
 					</div>
 				</section>
 
-				{/* Right — sign in / register or signed-in panel */}
+				{/* Right — sign in / register or signed-in panel (or setup hint if not configured) */}
 				<section className="p-5 space-y-3">
-					<Show when="signed-out">
-						<div className="space-y-1">
-							<h3 className="text-[12px] uppercase font-bold text-zinc-500">Sign in</h3>
-							<p className="text-[12px] text-zinc-500">
-								Log in or register to keep your watchlist synced and always up to date — no manual
-								exports, available from any device.
-							</p>
-						</div>
-						<div className="flex flex-col gap-2">
-							<SignInButton mode="modal">
-								<button
-									type="button"
-									className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-zinc-100 text-zinc-900 hover:bg-white transition-colors"
-								>
-									<LogIn className="h-3.5 w-3.5" />
-									Sign in
-								</button>
-							</SignInButton>
-							<SignUpButton mode="modal">
-								<button
-									type="button"
-									className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
-								>
-									<UserPlus className="h-3.5 w-3.5" />
-									Register
-								</button>
-							</SignUpButton>
-						</div>
-					</Show>
-
-					<Show when="signed-in">
-						<div className="space-y-1">
-							<h3 className="text-[12px] uppercase font-bold text-zinc-500">Account</h3>
-							<p className="text-[12px] text-zinc-500">
-								Your watchlist is synced to your account — available from any device.
-							</p>
-						</div>
-						<div className="flex flex-col gap-3">
-							<div className="rounded-lg border border-[#1e1e2e] bg-[#0a0a0f] p-3 space-y-1.5">
-								<div className="flex items-center gap-1.5">
-									<span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-									<span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400">
-										Connected
-									</span>
-								</div>
-								<p className="text-xs text-zinc-200 truncate">
-									{user?.primaryEmailAddress?.emailAddress ?? "—"}
-								</p>
-							</div>
-							<SignOutButton>
-								<button
-									type="button"
-									className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
-								>
-									<LogOut className="h-3.5 w-3.5" />
-									Log out
-								</button>
-							</SignOutButton>
-						</div>
-					</Show>
+					{accountsEnabled ? <ClerkAuthSection /> : <AccountSetupHint />}
 				</section>
 			</div>
 		</Dialog>
+	);
+}
+
+function ClerkAuthSection() {
+	const { user } = useUser();
+
+	return (
+		<>
+			<Show when="signed-out">
+				<div className="space-y-1">
+					<h3 className="text-[12px] uppercase font-bold text-zinc-500">Sign in</h3>
+					<p className="text-[12px] text-zinc-500">
+						Log in or register to keep your watchlist synced and always up to date — no manual
+						exports, available from any device.
+					</p>
+				</div>
+				<div className="flex flex-col gap-2">
+					<SignInButton mode="modal">
+						<button
+							type="button"
+							className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-zinc-100 text-zinc-900 hover:bg-white transition-colors"
+						>
+							<LogIn className="h-3.5 w-3.5" />
+							Sign in
+						</button>
+					</SignInButton>
+					<SignUpButton mode="modal">
+						<button
+							type="button"
+							className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
+						>
+							<UserPlus className="h-3.5 w-3.5" />
+							Register
+						</button>
+					</SignUpButton>
+				</div>
+			</Show>
+
+			<Show when="signed-in">
+				<div className="space-y-1">
+					<h3 className="text-[12px] uppercase font-bold text-zinc-500">Account</h3>
+					<p className="text-[12px] text-zinc-500">
+						Your watchlist is synced to your account — available from any device.
+					</p>
+				</div>
+				<div className="flex flex-col gap-3">
+					<div className="rounded-lg border border-[#1e1e2e] bg-[#0a0a0f] p-3 space-y-1.5">
+						<div className="flex items-center gap-1.5">
+							<span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+							<span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400">
+								Connected
+							</span>
+						</div>
+						<p className="text-xs text-zinc-200 truncate">
+							{user?.primaryEmailAddress?.emailAddress ?? "—"}
+						</p>
+					</div>
+					<SignOutButton>
+						<button
+							type="button"
+							className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
+						>
+							<LogOut className="h-3.5 w-3.5" />
+							Log out
+						</button>
+					</SignOutButton>
+				</div>
+			</Show>
+		</>
+	);
+}
+
+function AccountSetupHint() {
+	return (
+		<div className="space-y-1">
+			<h3 className="text-[12px] uppercase font-bold text-zinc-500">Sign in</h3>
+			<p className="text-[12px] text-zinc-500 leading-snug">
+				To use the account features, you&apos;ll need to set up a{" "}
+				<a
+					href="https://clerk.com"
+					target="_blank"
+					rel="noreferrer"
+					className="text-zinc-300 underline decoration-zinc-700 hover:decoration-zinc-400"
+				>
+					clerk.com
+				</a>{" "}
+				project, a redis instance on{" "}
+				<a
+					href="https://upstash.com"
+					target="_blank"
+					rel="noreferrer"
+					className="text-zinc-300 underline decoration-zinc-700 hover:decoration-zinc-400"
+				>
+					upstash.com
+				</a>{" "}
+				and fill in the credentials as per{" "}
+				<code className="rounded bg-zinc-800 px-1 py-0.5 text-[11px] text-zinc-300">
+					.env.example
+				</code>
+				.
+			</p>
+		</div>
 	);
 }

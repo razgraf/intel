@@ -163,7 +163,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 			<div className="text-sm font-semibold text-zinc-100">{item.ticker}</div>
 
 			{/* Chart */}
-			<div className="h-25 w-full">
+			<div className="h-25 w-full pointer-events-none md:pointer-events-auto">
 				<Liveline
 					key={`${item.ticker}-${timeframe}`}
 					data={livelineData}

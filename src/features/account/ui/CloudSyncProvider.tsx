@@ -7,6 +7,7 @@ import {
 } from "@/entities/watchlist/model/store";
 import { fetchCloudWatchlist, pushCloudWatchlist } from "@/features/account/lib/sync";
 import { MigrateLocalModal } from "@/features/account/ui/MigrateLocalModal";
+import { useAccountsEnabled } from "@/shared/lib/accounts-context";
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
 
@@ -22,6 +23,12 @@ function isDefaultWatchlist(items: { ticker: string }[]): boolean {
 }
 
 export function CloudSyncProvider() {
+	const enabled = useAccountsEnabled();
+	if (!enabled) return null;
+	return <CloudSyncProviderInner />;
+}
+
+function CloudSyncProviderInner() {
 	const { isLoaded, isSignedIn } = useUser();
 	const hydrated = useWatchlistHydrated();
 	const [migrateOpen, setMigrateOpen] = useState(false);

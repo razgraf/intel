@@ -1,15 +1,25 @@
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
-import { redis, watchlistKey } from "@/shared/lib/redis";
+import { isAccountsEnabled } from "@/shared/lib/accounts-config";
+import { getRedis, watchlistKey } from "@/shared/lib/redis";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const MAX_ITEMS = 200;
 
+function notConfigured() {
+	return NextResponse.json({ error: "Account features not configured" }, { status: 503 });
+}
+
 export async function GET() {
+	if (!isAccountsEnabled()) return notConfigured();
+
 	const { userId } = await auth();
 	if (!userId) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
+
+	const redis = getRedis();
+	if (!redis) return notConfigured();
 
 	try {
 		const items = await redis.get<WatchlistItem[]>(watchlistKey(userId));
@@ -30,10 +40,15 @@ function isValidItems(value: unknown): value is WatchlistItem[] {
 }
 
 export async function PUT(request: Request) {
+	if (!isAccountsEnabled()) return notConfigured();
+
 	const { userId } = await auth();
 	if (!userId) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
+
+	const redis = getRedis();
+	if (!redis) return notConfigured();
 
 	let body: unknown;
 	try {

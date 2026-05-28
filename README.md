@@ -12,13 +12,15 @@ Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, 
 
 ## Features
 
-| Details                            | Item enhancements                    | Export-able watchlist              |
+| Details                            | Item enhancements                    | Watchlist (local or account-based) |
 | :--------------------------------- | :----------------------------------- | :--------------------------------- |
 | ![Details](/assets/ss-details.png) | ![Settings](/assets/ss-settings.png) | ![Restore](/assets/ss-restore.png) |
 
 **Real-time asset grid** — interactive charts for stocks, ETFs, crypto, options (incl. crypto through Deribit), indexes, bonds, futures
 
 **Watchlist** — drag-to-reorder, ticker search, per-item settings (futures symbol overrides). Import/export via URL or QR code to share lists across devices.
+
+**Local or Account-based** — sync the watchlist using a local-first approach (export/import) or via a registered account
 
 **Earnings and events** — upcoming earnings dates (relative to device time) and FOMC meetings
 

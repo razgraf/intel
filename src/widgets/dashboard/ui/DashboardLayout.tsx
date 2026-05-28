@@ -6,6 +6,7 @@ import { AccountDialog } from "@/features/account/ui/AccountDialog";
 import { encodeWatchlist } from "@/features/watchlist-sync/lib/encode";
 import { ImportWatchlistModal } from "@/features/watchlist-sync/ui/ImportWatchlistModal";
 import { cn } from "@/lib/utils";
+import { useAccountsEnabled } from "@/shared/lib/accounts-context";
 import type { Timeframe } from "@/shared/lib/constants";
 import { EXCHANGES, getExchangeStatus } from "@/shared/lib/exchanges";
 import { formatLocalTime, getLocalTimezone } from "@/shared/lib/format";
@@ -36,7 +37,6 @@ export function DashboardLayout() {
 	const [timezone, setTimezone] = useState("");
 	const watchlistItems = useWatchlistStore((s) => s.items);
 	const resetAllTimeframes = useChartPreferencesStore((s) => s.resetAll);
-	const { isSignedIn } = useUser();
 
 	useEffect(() => {
 		setLocalTime(formatLocalTime(new Date()));
@@ -103,19 +103,7 @@ export function DashboardLayout() {
 				<div className="flex items-center gap-2 text-xs text-zinc-500">
 					<span className="tabular-nums">{localTime}</span>
 					<span>{timezone}</span>
-					<button
-						type="button"
-						className={cn(
-							"ml-1 p-1 rounded hover:bg-zinc-800 transition-colors",
-							isSignedIn
-								? "text-emerald-500 hover:text-emerald-400"
-								: "text-zinc-400 hover:text-zinc-200",
-						)}
-						onClick={() => setAccountOpen(true)}
-						aria-label="Account"
-					>
-						<User className="h-4 w-4" />
-					</button>
+					<AccountIconButton onClick={() => setAccountOpen(true)} />
 					<button
 						type="button"
 						className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
@@ -393,6 +381,40 @@ function SidebarContent({
 				<MarketHoursPanel />
 			</div>
 		</>
+	);
+}
+
+function AccountIconButton({ onClick }: { onClick: () => void }) {
+	const enabled = useAccountsEnabled();
+	if (enabled) return <AccountIconButtonWithAuth onClick={onClick} />;
+	return (
+		<button
+			type="button"
+			className="ml-1 p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+			onClick={onClick}
+			aria-label="Account"
+		>
+			<User className="h-4 w-4" />
+		</button>
+	);
+}
+
+function AccountIconButtonWithAuth({ onClick }: { onClick: () => void }) {
+	const { isSignedIn } = useUser();
+	return (
+		<button
+			type="button"
+			className={cn(
+				"ml-1 p-1 rounded hover:bg-zinc-800 transition-colors",
+				isSignedIn
+					? "text-emerald-500 hover:text-emerald-400"
+					: "text-zinc-400 hover:text-zinc-200",
+			)}
+			onClick={onClick}
+			aria-label="Account"
+		>
+			<User className="h-4 w-4" />
+		</button>
 	);
 }
 

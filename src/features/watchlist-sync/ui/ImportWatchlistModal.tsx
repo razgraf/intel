@@ -2,6 +2,7 @@
 
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
+import { useAccountsEnabled } from "@/shared/lib/accounts-context";
 import { Dialog } from "@/shared/ui/Dialog";
 import { useUser } from "@clerk/nextjs";
 import { AlertTriangle, Check } from "lucide-react";
@@ -117,7 +118,7 @@ export function ImportWatchlistModal({
 	const [loading, setLoading] = useState(false);
 	const [isExternal, setIsExternal] = useState(false);
 	const reorder = useWatchlistStore((s) => s.reorder);
-	const { isSignedIn } = useUser();
+	const accountsEnabled = useAccountsEnabled();
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
@@ -189,13 +190,7 @@ export function ImportWatchlistModal({
 					items you&apos;re tracking on this browser.
 				</p>
 
-				{isSignedIn && (
-					<div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2">
-						<p className="text-[11px] text-amber-300">
-							You&apos;re signed in. Restoring will replace your saved cloud watchlist.
-						</p>
-					</div>
-				)}
+				{accountsEnabled && <CloudOverwriteHint />}
 
 				{loading ? (
 					<div className="text-xs text-zinc-500 py-4 text-center">Validating tickers...</div>
@@ -247,5 +242,17 @@ export function ImportWatchlistModal({
 				</div>
 			</div>
 		</Dialog>
+	);
+}
+
+function CloudOverwriteHint() {
+	const { isSignedIn } = useUser();
+	if (!isSignedIn) return null;
+	return (
+		<div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+			<p className="text-[11px] text-amber-300">
+				You&apos;re signed in. Restoring will replace your saved cloud watchlist.
+			</p>
+		</div>
 	);
 }
