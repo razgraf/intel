@@ -29,6 +29,20 @@ export function formatCompact(value: number): string {
 	return compactFormatter.format(value);
 }
 
+export function formatCompactCurrency(value: number, currency = "USD"): string {
+	try {
+		return new Intl.NumberFormat("en-US", {
+			notation: "compact",
+			style: "currency",
+			currency,
+			maximumFractionDigits: 2,
+		}).format(value);
+	} catch {
+		// Falls back when the currency code isn't an ISO 4217 code (e.g. "GBp").
+		return `${compactFormatter.format(value)} ${currency}`;
+	}
+}
+
 export function formatTime(date: Date): string {
 	return date.toLocaleTimeString("en-US", {
 		hour: "2-digit",

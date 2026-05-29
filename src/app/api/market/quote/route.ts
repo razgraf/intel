@@ -19,6 +19,7 @@ interface YFQuote {
 	preMarketPrice?: number;
 	preMarketChange?: number;
 	preMarketChangePercent?: number;
+	marketCap?: number;
 }
 
 const CACHE_TTL = 30_000; // 30s
@@ -69,6 +70,7 @@ export async function GET(request: Request) {
 						preMarketPrice: q.preMarketPrice,
 						preMarketChange: q.preMarketChange,
 						preMarketChangePercent: q.preMarketChangePercent,
+						marketCap: q.marketCap,
 					};
 				}
 				console.error(

@@ -12,6 +12,8 @@ export interface EarningsOverride {
 }
 
 export const EARNINGS_OVERRIDES: Record<string, EarningsOverride> = {
-	// Example — uncomment + fill in once a real next date is known:
-	// LPTH: { date: "2026-08-04", hour: "amc" },
+	// LightPath fiscal year ends June 30. Q4/annual report historically lands
+	// in late September (Q4 FY25 was Sept 25, 2025). Earnings called AMC at
+	// 5pm ET. Q4 FY26 estimate per public sources (subject to confirmation).
+	LPTH: { date: "2026-09-24", hour: "amc" },
 };

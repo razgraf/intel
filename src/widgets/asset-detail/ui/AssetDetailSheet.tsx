@@ -9,7 +9,7 @@ import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { ExternalLinks } from "@/features/external-links/ui/ExternalLinks";
 import { ItemSettingsPopover } from "@/features/item-settings/ui/ItemSettingsPopover";
 import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
-import { formatPercent, formatPrice } from "@/shared/lib/format";
+import { formatCompactCurrency, formatPercent, formatPrice } from "@/shared/lib/format";
 import { IsinBadge } from "@/shared/ui/IsinBadge";
 import { motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
@@ -188,6 +188,14 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 									currency={currency}
 								/>
 								<StatRow label="Volume" value={spotQuote?.regularMarketVolume} isVolume />
+								{spotQuote?.marketCap != null && spotQuote.marketCap > 0 && (
+									<div className="rounded-lg bg-[#111118] p-3">
+										<span className="text-[11px] text-zinc-500 block">Market Cap</span>
+										<span className="text-sm tabular-nums text-zinc-200">
+											{formatCompactCurrency(spotQuote.marketCap, currency)}
+										</span>
+									</div>
+								)}
 								{effectiveIsin && item && isIsinCompatible(item) && (
 									<div className="rounded-lg bg-[#111118] p-3">
 										<span className="text-[11px] text-zinc-500 block">ISIN</span>

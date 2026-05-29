@@ -18,6 +18,7 @@ export interface Quote {
 	preMarketPrice?: number;
 	preMarketChange?: number;
 	preMarketChangePercent?: number;
+	marketCap?: number;
 }
 
 export interface HistoricalPoint {
