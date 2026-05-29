@@ -1,9 +1,11 @@
 "use client";
 
+import { isPolymarketItem } from "@/entities/watchlist/model/helpers";
 import { useWatchlistHydrated, useWatchlistStore } from "@/entities/watchlist/model/store";
 import { AssetCard } from "./AssetCard";
 import { CountdownCard } from "./CountdownCard";
 import { EmbedCard } from "./EmbedCard";
+import { PolymarketCard } from "./PolymarketCard";
 import { TargetsCard } from "./TargetsCard";
 
 interface AssetGridProps {
@@ -33,6 +35,8 @@ export function AssetGrid({ onOpenDetail }: AssetGridProps) {
 					<CountdownCard key={item.ticker} item={item} />
 				) : item.type === "Targets" ? (
 					<TargetsCard key={item.ticker} item={item} />
+				) : isPolymarketItem(item) ? (
+					<PolymarketCard key={item.ticker} item={item} />
 				) : (
 					<AssetCard
 						key={item.ticker}

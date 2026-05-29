@@ -4,6 +4,7 @@ import { useDeribitQuotes } from "@/entities/asset/api/deribit-queries";
 import { useQuotes } from "@/entities/asset/api/queries";
 import {
 	isCountdownItem,
+	isPolymarketItem,
 	isSpecialWatchlistItem,
 	isTargetsItem,
 } from "@/entities/watchlist/model/helpers";
@@ -33,7 +34,7 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 	const [targetsOpen, setTargetsOpen] = useState(false);
 
 	const yahooTickers = items
-		.filter((i) => i.source !== "deribit" && !isSpecialWatchlistItem(i))
+		.filter((i) => i.source !== "deribit" && !isSpecialWatchlistItem(i) && !isPolymarketItem(i))
 		.map((i) => i.ticker);
 	const deribitTickers = items
 		.filter((i) => i.source === "deribit" && !isSpecialWatchlistItem(i))

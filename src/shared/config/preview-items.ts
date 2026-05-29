@@ -81,4 +81,16 @@ export const PREVIEW_ITEMS: WatchlistItem[] = [
 			],
 		},
 	},
+	{
+		ticker: "world-cup-winner",
+		label: "World Cup Winner",
+		type: "Polymarket",
+		source: "polymarket",
+		currency: "USDC",
+		polymarket: {
+			eventId: "30615",
+			slug: "world-cup-winner",
+			title: "World Cup Winner",
+		},
+	},
 ];

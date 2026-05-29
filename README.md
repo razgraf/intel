@@ -48,6 +48,7 @@ Or spin up the app and explore examples on the `/preview` page.
 | Live feed       | "Bloomberg" or "Yahoo" | YouTube embed in grid                            | <img src="./assets/cards/embed.png" height="72" />          |
 | Countdown       | "Countdown"            | `May 16th 9PM` or Natural language               | <img src="./assets/cards/countdown.png" height="72" />      |
 | Targets         | "Targets"              | Up to 4 target prices, glow within 2%            | <img src="./assets/cards/targets.png" height="72" />        |
+| Polymarket      | "Poly" + name          | `polymarket world cup` — adds prediction event   | <img src="./assets/cards/polymarket.png" height="72" />     |
 
 ## Quickstart
 
@@ -59,7 +60,7 @@ bun install
 bun dev
 ```
 
-No API keys required for data (Yahoo Finance, Deribit) is fetched server-side without authentication. Open at [http://localhost:3100](http://localhost:3100).
+No API keys required for data (Yahoo Finance, Deribit, Polymarket) is fetched server-side without authentication. Open at [http://localhost:3100](http://localhost:3100).
 API keys required only if you wish to add support for accounts (optional): Clerk, Upstash Redis (see `.env.example`).
 
 ### Deploy your own instance
@@ -96,11 +97,10 @@ Deploy your own copy of Intel to Vercel in one click.
 
 - [x] Accounts alongside anonymous lists
 - [x] Deribit options
-- [ ] Polymarket or Kalshi markets
+- [x] Polymarket markets
 - [x] Price alerts (local)
 - [ ] More reliable data sources (Yahoo may rate-limit or be incomplete), maybe Alpha Vantage (?)
 - [ ] More special grid items (keyword trackers, AI-generated market reports, news feeds)
-- [ ] Commercial version with paid subscriptions
 </details>
 
 ## License

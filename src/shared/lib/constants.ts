@@ -6,6 +6,7 @@ export const AssetType = {
 	Future: "Future",
 	Option: "Option",
 	Index: "Index",
+	Polymarket: "Polymarket",
 } as const;
 
 export type AssetType = (typeof AssetType)[keyof typeof AssetType];
@@ -44,6 +45,7 @@ export const ASSET_TYPE_COLORS: Record<AssetType | "Embed" | "Countdown" | "Targ
 	Future: "#f472b6",
 	Option: "#fb923c",
 	Index: "#38bdf8",
+	Polymarket: "#2D9CDB",
 	Embed: "#e11d48",
 	Countdown: "#facc15",
 	Targets: "#a1a1aa",

@@ -1,7 +1,12 @@
 "use client";
 
 import type { Quote } from "@/entities/asset/model/types";
-import { isCountdownItem, isEmbedItem, isTargetsItem } from "@/entities/watchlist/model/helpers";
+import {
+	isCountdownItem,
+	isEmbedItem,
+	isPolymarketItem,
+	isTargetsItem,
+} from "@/entities/watchlist/model/helpers";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { ItemSettingsPopover } from "@/features/item-settings/ui/ItemSettingsPopover";
@@ -77,7 +82,10 @@ export function WatchlistRow({
 			}`}
 			onClick={onClick}
 			onDoubleClick={
-				!isEmbedItem(item) && !isCountdownItem(item) && !isTargetsItem(item)
+				!isEmbedItem(item) &&
+				!isCountdownItem(item) &&
+				!isTargetsItem(item) &&
+				!isPolymarketItem(item)
 					? onOpenDetail
 					: undefined
 			}
@@ -122,6 +130,17 @@ export function WatchlistRow({
 					<span className="text-[10px] text-zinc-500">
 						{item.targets?.rows.length ?? 0}/{MAX_TARGET_ROWS}
 					</span>
+				</>
+			) : isPolymarketItem(item) ? (
+				<>
+					<div
+						className="h-1.5 w-1.5 rounded-full shrink-0"
+						style={{ backgroundColor: ASSET_TYPE_COLORS.Polymarket }}
+					/>
+					<span className="text-xs font-medium text-zinc-200 flex-1 truncate text-left">
+						{item.polymarket?.title ?? item.label ?? item.ticker}
+					</span>
+					<span className="text-[10px] text-zinc-500">Poly</span>
 				</>
 			) : (
 				<>

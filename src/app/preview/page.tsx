@@ -1,11 +1,13 @@
 "use client";
 
 import { SegmentedControl } from "@/components/ui/segmented-control";
+import { isPolymarketItem } from "@/entities/watchlist/model/helpers";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { PREVIEW_ITEMS } from "@/shared/config/preview-items";
 import { AssetCard } from "@/widgets/asset-grid/ui/AssetCard";
 import { CountdownCard } from "@/widgets/asset-grid/ui/CountdownCard";
 import { EmbedCard } from "@/widgets/asset-grid/ui/EmbedCard";
+import { PolymarketCard } from "@/widgets/asset-grid/ui/PolymarketCard";
 import { TargetsCard } from "@/widgets/asset-grid/ui/TargetsCard";
 import { useState } from "react";
 
@@ -47,6 +49,8 @@ export default function PreviewPage() {
 						<CountdownCard item={activeItem} />
 					) : activeItem.type === "Targets" ? (
 						<TargetsCard item={activeItem} />
+					) : isPolymarketItem(activeItem) ? (
+						<PolymarketCard item={activeItem} />
 					) : (
 						<AssetCard item={activeItem} />
 					)}

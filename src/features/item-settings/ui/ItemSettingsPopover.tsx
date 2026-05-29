@@ -5,6 +5,7 @@ import { useIsinsStore } from "@/entities/isins/model/store";
 import {
 	isCountdownItem,
 	isIsinCompatible,
+	isPolymarketItem,
 	isTargetsItem,
 } from "@/entities/watchlist/model/helpers";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
@@ -33,6 +34,7 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 	const notesWereTrimmed = initialNotes.length > NOTES_MAX;
 	const [notes, setNotes] = useState(initialNotes.slice(0, NOTES_MAX));
 	const showIsinField = isIsinCompatible(item);
+	const showFuturesField = !isPolymarketItem(item);
 
 	useEffect(() => {
 		const timer = setTimeout(() => setDebouncedQuery(futuresQuery), 300);
@@ -65,7 +67,7 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 			}
 		}
 		update(item.ticker, {
-			futuresTicker: futuresTicker || undefined,
+			futuresTicker: showFuturesField ? futuresTicker || undefined : undefined,
 			// Legacy item.isin always cleared on save — master list is the source of truth.
 			isin: undefined,
 			notes: notes || undefined,
@@ -149,68 +151,72 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 					<h3 className="text-sm font-semibold text-zinc-100">Settings — {item.ticker}</h3>
 
 					{/* Futures ticker with search */}
-					<div className="space-y-1.5">
-						<span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
-							Futures Ticker
-						</span>
-						<p className="text-[11px] text-zinc-500 leading-tight">
-							Link a futures contract to show its price alongside the spot price
-						</p>
-						{futuresTicker && (
-							<div className="flex items-center gap-2">
-								<span className="text-xs text-zinc-200">{futuresTicker}</span>
-								<button
-									type="button"
-									onClick={() => setFuturesTicker("")}
-									className="text-[10px] text-zinc-500 hover:text-red-400 transition-colors"
-								>
-									Clear
-								</button>
-							</div>
-						)}
-						<div className="relative">
-							<div className="flex items-center gap-2 rounded-lg bg-[#1e1e2e] px-2.5 py-1.5">
-								<Search className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
-								<input
-									type="text"
-									value={futuresQuery}
-									onChange={(e) => setFuturesQuery(e.target.value)}
-									placeholder="Search futures ticker..."
-									className="w-full bg-transparent text-xs text-zinc-100 outline-none placeholder:text-zinc-500"
-								/>
-							</div>
-							{debouncedQuery && (
-								<div className="absolute z-10 mt-1 w-full rounded-lg border border-[#1e1e2e] bg-[#18181b] shadow-xl max-h-40 overflow-y-auto">
-									{searching ? (
-										<div className="px-3 py-3 text-center text-xs text-zinc-500">Searching...</div>
-									) : searchResults.length === 0 ? (
-										<div className="px-3 py-3 text-center text-xs text-zinc-500">No results</div>
-									) : (
-										<ul className="py-1">
-											{searchResults.slice(0, 8).map((r) => (
-												<li key={r.symbol}>
-													<button
-														type="button"
-														onClick={() => {
-															setFuturesTicker(r.symbol);
-															setFuturesQuery("");
-															setDebouncedQuery("");
-														}}
-														className="flex w-full items-center justify-between px-3 py-1.5 text-left hover:bg-[#1e1e2e] transition-colors"
-													>
-														<span className="text-xs font-medium text-zinc-100">{r.symbol}</span>
-														<span className="text-[10px] text-zinc-500 truncate max-w-[140px] ml-2">
-															{r.shortname}
-														</span>
-													</button>
-												</li>
-											))}
-										</ul>
-									)}
+					{showFuturesField && (
+						<div className="space-y-1.5">
+							<span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
+								Futures Ticker
+							</span>
+							<p className="text-[11px] text-zinc-500 leading-tight">
+								Link a futures contract to show its price alongside the spot price
+							</p>
+							{futuresTicker && (
+								<div className="flex items-center gap-2">
+									<span className="text-xs text-zinc-200">{futuresTicker}</span>
+									<button
+										type="button"
+										onClick={() => setFuturesTicker("")}
+										className="text-[10px] text-zinc-500 hover:text-red-400 transition-colors"
+									>
+										Clear
+									</button>
 								</div>
 							)}
+							<div className="relative">
+								<div className="flex items-center gap-2 rounded-lg bg-[#1e1e2e] px-2.5 py-1.5">
+									<Search className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
+									<input
+										type="text"
+										value={futuresQuery}
+										onChange={(e) => setFuturesQuery(e.target.value)}
+										placeholder="Search futures ticker..."
+										className="w-full bg-transparent text-xs text-zinc-100 outline-none placeholder:text-zinc-500"
+									/>
+								</div>
+								{debouncedQuery && (
+									<div className="absolute z-10 mt-1 w-full rounded-lg border border-[#1e1e2e] bg-[#18181b] shadow-xl max-h-40 overflow-y-auto">
+										{searching ? (
+											<div className="px-3 py-3 text-center text-xs text-zinc-500">
+												Searching...
+											</div>
+										) : searchResults.length === 0 ? (
+											<div className="px-3 py-3 text-center text-xs text-zinc-500">No results</div>
+										) : (
+											<ul className="py-1">
+												{searchResults.slice(0, 8).map((r) => (
+													<li key={r.symbol}>
+														<button
+															type="button"
+															onClick={() => {
+																setFuturesTicker(r.symbol);
+																setFuturesQuery("");
+																setDebouncedQuery("");
+															}}
+															className="flex w-full items-center justify-between px-3 py-1.5 text-left hover:bg-[#1e1e2e] transition-colors"
+														>
+															<span className="text-xs font-medium text-zinc-100">{r.symbol}</span>
+															<span className="text-[10px] text-zinc-500 truncate max-w-[140px] ml-2">
+																{r.shortname}
+															</span>
+														</button>
+													</li>
+												))}
+											</ul>
+										)}
+									</div>
+								)}
+							</div>
 						</div>
-					</div>
+					)}
 
 					{/* ISIN */}
 					{showIsinField && (

@@ -31,6 +31,9 @@ function normalizeItems(items: unknown[]): WatchlistItem[] | null {
 		if (item.type === "Countdown" && !item.source) {
 			item.source = "countdown";
 		}
+		if (item.type === "Polymarket" && !item.source) {
+			item.source = "polymarket";
+		}
 	}
 	return items as WatchlistItem[];
 }

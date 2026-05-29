@@ -22,6 +22,13 @@ export interface TargetsConfig {
 	rows: TargetRow[];
 }
 
+export interface PolymarketConfig {
+	eventId: string;
+	slug: string;
+	title?: string;
+	image?: string;
+}
+
 export interface WatchlistItem {
 	ticker: string;
 	title?: string;
@@ -34,5 +41,6 @@ export interface WatchlistItem {
 	embed?: EmbedConfig;
 	countdown?: CountdownConfig;
 	targets?: TargetsConfig;
-	source?: "yahoo" | "deribit" | "youtube" | "countdown" | "targets";
+	polymarket?: PolymarketConfig;
+	source?: "yahoo" | "deribit" | "youtube" | "countdown" | "targets" | "polymarket";
 }

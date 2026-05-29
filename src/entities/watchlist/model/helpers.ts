@@ -12,6 +12,10 @@ export function isTargetsItem(item: WatchlistItem): boolean {
 	return item.type === "Targets";
 }
 
+export function isPolymarketItem(item: WatchlistItem): boolean {
+	return item.type === "Polymarket" || item.source === "polymarket";
+}
+
 export function isSpecialWatchlistItem(item: WatchlistItem): boolean {
 	return isEmbedItem(item) || isCountdownItem(item) || isTargetsItem(item);
 }
@@ -34,6 +38,6 @@ const TARGETS_PRICEABLE_TYPES = new Set([
 
 export function isPriceableForTargets(item: WatchlistItem): boolean {
 	if (!item.type || isSpecialWatchlistItem(item)) return false;
-	if (item.source === "deribit") return false;
+	if (item.source === "deribit" || item.source === "polymarket") return false;
 	return TARGETS_PRICEABLE_TYPES.has(item.type);
 }
