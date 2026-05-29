@@ -5,8 +5,9 @@ import { getEffectiveIsins } from "@/entities/isins/model/helpers";
 import { useIsinsStore } from "@/entities/isins/model/store";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { Dialog } from "@/shared/ui/Dialog";
-import { Plus, Search, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Flag, Plus, Search, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface IsinsDialogProps {
 	open: boolean;
@@ -20,9 +21,24 @@ interface DraftRow {
 }
 
 const ISIN_RE = /^[A-Z0-9]{12}$/;
+const REGIONAL_A = 0x1f1e6; // regional indicator symbol "A"
 
 function makeRowId() {
 	return Math.random().toString(36).slice(2);
+}
+
+/**
+ * Convert the ISO 3166-1 alpha-2 country code at the start of an ISIN into
+ * a flag emoji (e.g. "US..." → 🇺🇸). Returns null when the first 2 chars
+ * aren't alphabetic. Unrecognized 2-letter codes (e.g. "XS" supranational)
+ * still get emitted — the OS picks the glyph or falls back to RI letters.
+ */
+function isinToFlag(isin: string): string | null {
+	const code = isin.trim().toUpperCase().slice(0, 2);
+	if (!/^[A-Z]{2}$/.test(code)) return null;
+	const a = REGIONAL_A + (code.charCodeAt(0) - 0x41);
+	const b = REGIONAL_A + (code.charCodeAt(1) - 0x41);
+	return String.fromCodePoint(a) + String.fromCodePoint(b);
 }
 
 export function IsinsDialog({ open, onClose }: IsinsDialogProps) {
@@ -178,6 +194,12 @@ interface IsinRowProps {
 function IsinRow({ row, watchlistTickers, active, onFocus, onChange, onRemove }: IsinRowProps) {
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [debouncedTicker, setDebouncedTicker] = useState("");
+	const inputWrapperRef = useRef<HTMLDivElement>(null);
+	const [dropdownCoords, setDropdownCoords] = useState<{
+		top: number;
+		left: number;
+		width: number;
+	} | null>(null);
 
 	useEffect(() => {
 		const trimmed = row.ticker.trim();
@@ -201,6 +223,29 @@ function IsinRow({ row, watchlistTickers, active, onFocus, onChange, onRemove }:
 	const isinUpper = row.isin.trim().toUpperCase();
 	const isinIsInvalid = isinUpper.length > 0 && !ISIN_RE.test(isinUpper);
 
+	const dropdownVisible =
+		active && showDropdown && (localMatches.length > 0 || (yahooQuery && yahooResults.length > 0));
+
+	useEffect(() => {
+		if (!dropdownVisible) {
+			setDropdownCoords(null);
+			return;
+		}
+		function update() {
+			const el = inputWrapperRef.current;
+			if (!el) return;
+			const r = el.getBoundingClientRect();
+			setDropdownCoords({ top: r.bottom + 4, left: r.left, width: r.width });
+		}
+		update();
+		window.addEventListener("scroll", update, true);
+		window.addEventListener("resize", update);
+		return () => {
+			window.removeEventListener("scroll", update, true);
+			window.removeEventListener("resize", update);
+		};
+	}, [dropdownVisible]);
+
 	const closeDropdown = () => {
 		setShowDropdown(false);
 	};
@@ -208,7 +253,7 @@ function IsinRow({ row, watchlistTickers, active, onFocus, onChange, onRemove }:
 	return (
 		<div className="space-y-1.5">
 			<div className="flex items-center gap-1.5">
-				<div className="relative flex-1">
+				<div ref={inputWrapperRef} className="relative flex-1">
 					<div className="flex items-center gap-2 rounded-lg bg-[#1e1e2e] px-2.5 py-1.5">
 						<Search className="h-3 w-3 text-zinc-500 shrink-0" />
 						<input
@@ -230,10 +275,19 @@ function IsinRow({ row, watchlistTickers, active, onFocus, onChange, onRemove }:
 							className="w-full bg-transparent text-xs text-zinc-100 outline-none placeholder:text-zinc-500"
 						/>
 					</div>
-					{active &&
-						showDropdown &&
-						(localMatches.length > 0 || (yahooQuery && yahooResults.length > 0)) && (
-							<div className="absolute z-10 mt-1 w-full rounded-lg border border-[#1e1e2e] bg-[#18181b] shadow-xl max-h-40 overflow-y-auto">
+					{dropdownVisible &&
+						dropdownCoords &&
+						createPortal(
+							<div
+								style={{
+									position: "fixed",
+									top: dropdownCoords.top,
+									left: dropdownCoords.left,
+									width: dropdownCoords.width,
+									zIndex: 60,
+								}}
+								className="rounded-lg border border-[#1e1e2e] bg-[#18181b] shadow-xl max-h-40 overflow-y-auto"
+							>
 								{localMatches.length > 0 && (
 									<ul className="py-1">
 										{localMatches.map((t) => (
@@ -279,19 +333,34 @@ function IsinRow({ row, watchlistTickers, active, onFocus, onChange, onRemove }:
 										))}
 									</ul>
 								)}
-							</div>
+							</div>,
+							document.body,
 						)}
 				</div>
 
-				<input
-					type="text"
-					value={row.isin}
-					onChange={(e) => onChange({ isin: e.target.value.toUpperCase() })}
-					onFocus={onFocus}
-					maxLength={12}
-					placeholder="ISIN (12 chars)"
-					className={`w-44 rounded-lg bg-[#1e1e2e] px-2.5 py-1.5 text-xs tabular-nums text-zinc-100 outline-none placeholder:text-zinc-500 focus:ring-1 ${isinIsInvalid ? "ring-1 ring-red-500/50 focus:ring-red-500" : "focus:ring-zinc-600"}`}
-				/>
+				<div
+					className={`w-44 flex items-center gap-2 rounded-lg bg-[#1e1e2e] px-2.5 py-1.5 focus-within:ring-1 ${isinIsInvalid ? "ring-1 ring-red-500/50 focus-within:ring-red-500" : "focus-within:ring-zinc-600"}`}
+				>
+					<span className="shrink-0 leading-none">
+						{(() => {
+							const flag = isinToFlag(row.isin);
+							return flag ? (
+								<span className="text-sm">{flag}</span>
+							) : (
+								<Flag className="h-3.5 w-3.5 text-zinc-600" />
+							);
+						})()}
+					</span>
+					<input
+						type="text"
+						value={row.isin}
+						onChange={(e) => onChange({ isin: e.target.value.toUpperCase() })}
+						onFocus={onFocus}
+						maxLength={12}
+						placeholder="ISIN (12 chars)"
+						className="flex-1 bg-transparent text-xs tabular-nums text-zinc-100 outline-none placeholder:text-zinc-500"
+					/>
+				</div>
 
 				<button
 					type="button"
