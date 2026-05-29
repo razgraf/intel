@@ -233,7 +233,11 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 
 					{/* Links */}
 					<div className="flex items-center justify-between pt-2 border-t border-[#1e1e2e]">
-						<ExternalLinks ticker={ticker} source={externalSource} />
+						<ExternalLinks
+							ticker={ticker}
+							source={externalSource}
+							quoteType={spotQuote?.quoteType}
+						/>
 						{item?.notes && <p className="text-xs text-zinc-500 italic">{item.notes}</p>}
 					</div>
 				</div>

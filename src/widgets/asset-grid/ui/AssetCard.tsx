@@ -241,7 +241,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 						</div>
 						{spotQuote?.marketState === "PRE" && spotQuote?.preMarketPrice ? (
 							<div className="flex items-center justify-between">
-								<span className="text-[11px] text-zinc-500">Pre-mkt</span>
+								<span className="text-[11px] text-zinc-500">Pre-Market</span>
 								<div className="flex items-center gap-2">
 									{spotQuote.preMarketChangePercent != null && (
 										<span
@@ -272,6 +272,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 			<div className="flex items-center mt-auto justify-between py-1 pt-3 border-t border-[#1e1e2e]">
 				<ExternalLinks
 					ticker={item.ticker}
+					quoteType={spotQuote?.quoteType}
 					source={
 						item.source === "deribit" ? "deribit" : item.source === "youtube" ? "youtube" : "yahoo"
 					}

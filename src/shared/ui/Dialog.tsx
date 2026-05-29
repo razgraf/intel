@@ -2,7 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface DialogProps {
 	open: boolean;
@@ -17,6 +18,11 @@ const EASING: [number, number, number, number] = [0.23, 1, 0.32, 1]; // ease-out
 
 export function Dialog({ open, onClose, children, className }: DialogProps) {
 	const shouldReduceMotion = useReducedMotion();
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	useEffect(() => {
 		if (!open) return;
@@ -27,7 +33,9 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
 		return () => document.removeEventListener("keydown", onKey);
 	}, [open, onClose]);
 
-	return (
+	if (!mounted) return null;
+
+	return createPortal(
 		<AnimatePresence>
 			{open && (
 				<motion.div
@@ -71,6 +79,7 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
 					</motion.div>
 				</motion.div>
 			)}
-		</AnimatePresence>
+		</AnimatePresence>,
+		document.body,
 	);
 }

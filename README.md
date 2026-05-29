@@ -57,7 +57,8 @@ bun install
 bun dev
 ```
 
-No API keys required — data (Yahoo Finance, Deribit) is fetched server-side without authentication. Open at [http://localhost:3100](http://localhost:3100).
+No API keys required for data (Yahoo Finance, Deribit) is fetched server-side without authentication. Open at [http://localhost:3100](http://localhost:3100).
+API keys required only if you wish to add support for accounts (optional): Clerk, Upstash Redis (see `.env.example`).
 
 ### Deploy your own instance
 
