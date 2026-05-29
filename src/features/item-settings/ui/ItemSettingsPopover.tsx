@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearch } from "@/entities/asset/api/queries";
+import { useIsinsStore } from "@/entities/isins/model/store";
 import {
 	isCountdownItem,
 	isIsinCompatible,
@@ -14,18 +15,23 @@ import { Dialog } from "@/shared/ui/Dialog";
 import { Search, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
+const NOTES_MAX = 300;
+
 interface ItemSettingsPopoverProps {
 	item: WatchlistItem;
 }
 
 export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 	const update = useWatchlistStore((s) => s.update);
+	const masterIsin = useIsinsStore((s) => s.isins[item.ticker]);
 	const [open, setOpen] = useState(false);
 	const [futuresTicker, setFuturesTicker] = useState(item.futuresTicker ?? "");
 	const [futuresQuery, setFuturesQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
-	const [isin, setIsin] = useState(item.isin ?? "");
-	const [notes, setNotes] = useState(item.notes ?? "");
+	const [isin, setIsin] = useState(masterIsin ?? item.isin ?? "");
+	const initialNotes = item.notes ?? "";
+	const notesWereTrimmed = initialNotes.length > NOTES_MAX;
+	const [notes, setNotes] = useState(initialNotes.slice(0, NOTES_MAX));
 	const showIsinField = isIsinCompatible(item);
 
 	useEffect(() => {
@@ -38,8 +44,8 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 	function handleOpen(e: React.MouseEvent) {
 		e.stopPropagation();
 		setFuturesTicker(item.futuresTicker ?? "");
-		setIsin(item.isin ?? "");
-		setNotes(item.notes ?? "");
+		setIsin(useIsinsStore.getState().isins[item.ticker] ?? item.isin ?? "");
+		setNotes((item.notes ?? "").slice(0, NOTES_MAX));
 		setFuturesQuery("");
 		setDebouncedQuery("");
 		setOpen(true);
@@ -50,9 +56,18 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 	}
 
 	function handleSave() {
+		const trimmedIsin = isin.trim().toUpperCase();
+		if (showIsinField) {
+			if (/^[A-Z0-9]{12}$/.test(trimmedIsin)) {
+				useIsinsStore.getState().set(item.ticker, trimmedIsin);
+			} else {
+				useIsinsStore.getState().remove(item.ticker);
+			}
+		}
 		update(item.ticker, {
 			futuresTicker: futuresTicker || undefined,
-			isin: showIsinField ? isin.trim() || undefined : item.isin,
+			// Legacy item.isin always cleared on save — master list is the source of truth.
+			isin: undefined,
 			notes: notes || undefined,
 		});
 		handleClose();
@@ -217,14 +232,25 @@ export function ItemSettingsPopover({ item }: ItemSettingsPopoverProps) {
 
 					{/* Notes */}
 					<div className="space-y-1.5">
-						<span className="text-[10px] uppercase tracking-wider text-zinc-500 block">Notes</span>
+						<div className="flex items-baseline justify-between gap-2">
+							<span className="text-[10px] uppercase tracking-wider text-zinc-500 block">
+								Notes
+							</span>
+							<span className="text-[10px] tabular-nums text-zinc-600">
+								{notes.length}/{NOTES_MAX}
+							</span>
+						</div>
 						<p className="text-[11px] text-zinc-500 leading-tight">
 							Personal notes about this asset (not shown elsewhere)
 						</p>
+						{notesWereTrimmed && (
+							<p className="text-[10px] text-amber-300">Notes were trimmed to {NOTES_MAX} chars</p>
+						)}
 						<textarea
 							value={notes}
-							onChange={(e) => setNotes(e.target.value)}
+							onChange={(e) => setNotes(e.target.value.slice(0, NOTES_MAX))}
 							rows={3}
+							maxLength={NOTES_MAX}
 							className="w-full rounded-lg bg-[#1e1e2e] px-2.5 py-1.5 text-xs text-zinc-100 outline-none resize-none placeholder:text-zinc-500 focus:ring-1 focus:ring-zinc-600"
 							placeholder="Add notes..."
 						/>

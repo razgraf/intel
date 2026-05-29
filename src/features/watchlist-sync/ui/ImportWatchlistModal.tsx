@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsinsStore } from "@/entities/isins/model/store";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { useAccountsEnabled } from "@/shared/lib/accounts-context";
@@ -60,13 +61,13 @@ function validatePayload(
 	payload: string,
 	callbacks: {
 		onStart: () => void;
-		onResult: (items: ValidatedItem[]) => void;
+		onResult: (items: ValidatedItem[], isins: Record<string, string>) => void;
 		onFinally: () => void;
 		onEmpty: () => void;
 	},
 ) {
 	const decoded = decodeWatchlist(payload);
-	if (!decoded || decoded.length === 0) {
+	if (!decoded || decoded.watchlist.length === 0) {
 		callbacks.onEmpty();
 		return;
 	}
@@ -74,7 +75,7 @@ function validatePayload(
 	callbacks.onStart();
 
 	const buckets = new Map<SourceConfig, WatchlistItem[]>();
-	for (const item of decoded) {
+	for (const item of decoded.watchlist) {
 		const config = Object.values(SOURCE_CONFIGS).find((c) => c.match(item));
 		if (!config) continue;
 		const list = buckets.get(config) ?? [];
@@ -100,11 +101,11 @@ function validatePayload(
 			const foundSet = new Set<string>(skippedTickers);
 			for (const s of sets) for (const t of s) foundSet.add(t);
 
-			const validated: ValidatedItem[] = decoded.map((item) => ({
+			const validated: ValidatedItem[] = decoded.watchlist.map((item) => ({
 				item,
 				valid: foundSet.has(item.ticker),
 			}));
-			callbacks.onResult(validated);
+			callbacks.onResult(validated, decoded.isins);
 		})
 		.finally(() => callbacks.onFinally());
 }
@@ -114,6 +115,7 @@ export function ImportWatchlistModal({
 	onExternalClose,
 }: ImportWatchlistModalProps = {}) {
 	const [items, setItems] = useState<ValidatedItem[] | null>(null);
+	const [pendingIsins, setPendingIsins] = useState<Record<string, string>>({});
 	const [open, setOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [isExternal, setIsExternal] = useState(false);
@@ -129,7 +131,10 @@ export function ImportWatchlistModal({
 		setOpen(true);
 		validatePayload(payload, {
 			onStart: () => setLoading(true),
-			onResult: (validated) => setItems(validated),
+			onResult: (validated, isins) => {
+				setItems(validated);
+				setPendingIsins(isins);
+			},
 			onFinally: () => setLoading(false),
 			onEmpty: () => clearParam(),
 		});
@@ -143,7 +148,10 @@ export function ImportWatchlistModal({
 		setOpen(true);
 		validatePayload(externalPayload, {
 			onStart: () => setLoading(true),
-			onResult: (validated) => setItems(validated),
+			onResult: (validated, isins) => {
+				setItems(validated);
+				setPendingIsins(isins);
+			},
 			onFinally: () => setLoading(false),
 			onEmpty: () => {
 				setOpen(false);
@@ -162,13 +170,18 @@ export function ImportWatchlistModal({
 		if (!items) return;
 		const valid = items.filter((i) => i.valid).map((i) => i.item);
 		reorder(valid);
+		// Union-merge imported ISINs into the master store (don't wipe existing).
+		if (Object.keys(pendingIsins).length > 0) {
+			const current = useIsinsStore.getState().isins;
+			useIsinsStore.getState().replace({ ...current, ...pendingIsins });
+		}
 		if (isExternal) {
 			onExternalClose?.();
 		} else {
 			clearParam();
 		}
 		setOpen(false);
-	}, [items, reorder, clearParam, isExternal, onExternalClose]);
+	}, [items, pendingIsins, reorder, clearParam, isExternal, onExternalClose]);
 
 	const handleCancel = useCallback(() => {
 		if (isExternal) {

@@ -1,5 +1,7 @@
 "use client";
 
+import { getEffectiveIsins } from "@/entities/isins/model/helpers";
+import { useIsinsStore } from "@/entities/isins/model/store";
 import { DEFAULT_WATCHLIST, useWatchlistStore } from "@/entities/watchlist/model/store";
 import { pushCloudWatchlist } from "@/features/account/lib/sync";
 import { Dialog } from "@/shared/ui/Dialog";
@@ -19,7 +21,10 @@ export function MigrateLocalModal({ open }: MigrateLocalModalProps) {
 		setBusy("sync");
 		setError(null);
 		try {
-			await pushCloudWatchlist(items);
+			const master = useIsinsStore.getState().isins;
+			const isins = getEffectiveIsins(items, master);
+			const stripped = items.map(({ isin: _isin, ...rest }) => rest);
+			await pushCloudWatchlist(stripped, isins);
 			window.location.reload();
 		} catch (err) {
 			console.warn("MigrateLocalModal: sync failed", err);
@@ -33,7 +38,8 @@ export function MigrateLocalModal({ open }: MigrateLocalModalProps) {
 		setError(null);
 		try {
 			useWatchlistStore.setState({ items: DEFAULT_WATCHLIST });
-			await pushCloudWatchlist(DEFAULT_WATCHLIST);
+			useIsinsStore.getState().replace({});
+			await pushCloudWatchlist(DEFAULT_WATCHLIST, {});
 			window.location.reload();
 		} catch (err) {
 			console.warn("MigrateLocalModal: discard failed", err);

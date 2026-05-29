@@ -8,6 +8,7 @@ import {
 import { useChart, useQuotes } from "@/entities/asset/api/queries";
 import { inferAssetType } from "@/entities/asset/model/types";
 import { useChartPreferencesStore } from "@/entities/chart-preferences/model/store";
+import { useEffectiveIsin } from "@/entities/isins/model/helpers";
 import { isIsinCompatible } from "@/entities/watchlist/model/helpers";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
 import { TimeframeSelector } from "@/features/chart-timeframe/ui/TimeframeSelector";
@@ -68,6 +69,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 	const currencyLabel = isDeribit ? "USDC" : (spotQuote?.currency ?? item.currency ?? "USD");
 	const currencyFormat = isDeribit ? "USD" : currencyLabel;
 	const type = item.type ?? inferAssetType(spotQuote?.quoteType ?? "");
+	const effectiveIsin = useEffectiveIsin(item.ticker);
 
 	const formatChartTime = useMemo(() => {
 		return (t: number) => {
@@ -143,7 +145,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 					<span className="flex items-center gap-1 rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-zinc-400">
 						{currencyLabel}
 					</span>
-					{item.isin && isIsinCompatible(item) && <IsinBadge isin={item.isin} />}
+					{effectiveIsin && isIsinCompatible(item) && <IsinBadge isin={effectiveIsin} />}
 					{isDeribit && (
 						<span className="flex items-center gap-1 rounded-sm bg-zinc-800/60 px-2 py-0.5 text-[10px] text-emerald-400">
 							Deribit

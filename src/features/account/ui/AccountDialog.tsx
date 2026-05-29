@@ -1,5 +1,7 @@
 "use client";
 
+import { getEffectiveIsins } from "@/entities/isins/model/helpers";
+import { useIsinsStore } from "@/entities/isins/model/store";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { encodeWatchlist } from "@/features/watchlist-sync/lib/encode";
 import { useAccountsEnabled } from "@/shared/lib/accounts-context";
@@ -17,14 +19,16 @@ interface AccountDialogProps {
 
 export function AccountDialog({ open, onClose, onOpenQr, onOpenRestore }: AccountDialogProps) {
 	const watchlistItems = useWatchlistStore((s) => s.items);
+	const isinsMap = useIsinsStore((s) => s.isins);
 	const accountsEnabled = useAccountsEnabled();
 	const [copied, setCopied] = useState(false);
 
 	const exportUrl = useMemo(() => {
 		if (typeof window === "undefined") return "";
-		const payload = encodeWatchlist(watchlistItems);
+		const effectiveIsins = getEffectiveIsins(watchlistItems, isinsMap);
+		const payload = encodeWatchlist(watchlistItems, effectiveIsins);
 		return `${window.location.origin}${window.location.pathname}?watchlist=${payload}`;
-	}, [watchlistItems]);
+	}, [watchlistItems, isinsMap]);
 
 	const handleExport = useCallback(() => {
 		navigator.clipboard.writeText(exportUrl).then(() => {

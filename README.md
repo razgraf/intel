@@ -30,6 +30,8 @@ Designed for tracking stocks, ETFs, crypto, options (stock or crypto), futures, 
 
 **Tips slideshow** — rotating tips in the sidebar for discoverability
 
+**Misc.** - support for ISINs, quick links to TradingView or UnusualWhales, notes.
+
 ## Tracked Items
 
 Or spin up the app and explore examples on the `/preview` page.

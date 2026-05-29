@@ -1,8 +1,11 @@
 "use client";
 
 import { useChartPreferencesStore } from "@/entities/chart-preferences/model/store";
+import { getEffectiveIsins } from "@/entities/isins/model/helpers";
+import { useIsinsStore } from "@/entities/isins/model/store";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
 import { AccountDialog } from "@/features/account/ui/AccountDialog";
+import { IsinsDialog } from "@/features/isins/ui/IsinsDialog";
 import { encodeWatchlist } from "@/features/watchlist-sync/lib/encode";
 import { ImportWatchlistModal } from "@/features/watchlist-sync/ui/ImportWatchlistModal";
 import { cn } from "@/lib/utils";
@@ -14,6 +17,7 @@ import { Dialog } from "@/shared/ui/Dialog";
 import { AssetDetailSheet } from "@/widgets/asset-detail/ui/AssetDetailSheet";
 import { AssetGrid } from "@/widgets/asset-grid/ui/AssetGrid";
 import { EventsPanel } from "@/widgets/earnings/ui/EarningsPanel";
+import { HelpersPanel } from "@/widgets/helpers/ui/HelpersPanel";
 import { MarketHoursPanel } from "@/widgets/market-hours/ui/MarketHoursPanel";
 import { TipsPanel } from "@/widgets/tips/ui/TipsPanel";
 import { WatchlistPanel } from "@/widgets/watchlist/ui/WatchlistPanel";
@@ -36,6 +40,7 @@ export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [isinsOpen, setIsinsOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [restoreUrl, setRestoreUrl] = useState("");
@@ -43,6 +48,7 @@ export function DashboardLayout() {
   const [localTime, setLocalTime] = useState("");
   const [timezone, setTimezone] = useState("");
   const watchlistItems = useWatchlistStore((s) => s.items);
+  const isinsMap = useIsinsStore((s) => s.isins);
   const resetAllTimeframes = useChartPreferencesStore((s) => s.resetAll);
   const accountsEnabled = useAccountsEnabled();
 
@@ -60,9 +66,10 @@ export function DashboardLayout() {
 
   const exportUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    const payload = encodeWatchlist(watchlistItems);
+    const effectiveIsins = getEffectiveIsins(watchlistItems, isinsMap);
+    const payload = encodeWatchlist(watchlistItems, effectiveIsins);
     return `${window.location.origin}${window.location.pathname}?watchlist=${payload}`;
-  }, [watchlistItems]);
+  }, [watchlistItems, isinsMap]);
 
   const handleOpenPreview = useCallback(() => {
     setSettingsOpen(false);
@@ -147,6 +154,9 @@ export function DashboardLayout() {
             selectedTicker={selectedTicker}
             onSelect={setSelectedTicker}
             onOpenDetail={setDetailTicker}
+            onOpenIsins={() => setIsinsOpen(true)}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onOpenAccount={() => setAccountOpen(true)}
           />
         </aside>
 
@@ -172,6 +182,18 @@ export function DashboardLayout() {
                   selectedTicker={selectedTicker}
                   onSelect={setSelectedTicker}
                   onOpenDetail={setDetailTicker}
+                  onOpenIsins={() => {
+                    setSidebarOpen(false);
+                    setIsinsOpen(true);
+                  }}
+                  onOpenSettings={() => {
+                    setSidebarOpen(false);
+                    setSettingsOpen(true);
+                  }}
+                  onOpenAccount={() => {
+                    setSidebarOpen(false);
+                    setAccountOpen(true);
+                  }}
                 />
               </motion.aside>
             </>
@@ -300,6 +322,9 @@ export function DashboardLayout() {
         </div>
       </Dialog>
 
+      {/* ISINs dialog */}
+      <IsinsDialog open={isinsOpen} onClose={() => setIsinsOpen(false)} />
+
       {/* Account dialog */}
       <AccountDialog
         open={accountOpen}
@@ -419,10 +444,16 @@ function SidebarContent({
   selectedTicker,
   onSelect,
   onOpenDetail,
+  onOpenIsins,
+  onOpenSettings,
+  onOpenAccount,
 }: {
   selectedTicker: string | undefined;
   onSelect: (ticker: string | undefined) => void;
   onOpenDetail: (ticker: string) => void;
+  onOpenIsins: () => void;
+  onOpenSettings: () => void;
+  onOpenAccount: () => void;
 }) {
   return (
     <>
@@ -433,10 +464,18 @@ function SidebarContent({
           onOpenDetail={onOpenDetail}
         />
       </div>
+
       <div className="border-t border-[#1e1e2e] shrink-0">
         <TipsPanel />
       </div>
       <div className="border-t border-[#1e1e2e] shrink-0">
+        <HelpersPanel
+          onOpenIsins={onOpenIsins}
+          onOpenSettings={onOpenSettings}
+          onOpenAccount={onOpenAccount}
+        />
+      </div>
+      <div className="">
         <EventsPanel />
       </div>
       <div className="border-t border-[#1e1e2e] shrink-0">
