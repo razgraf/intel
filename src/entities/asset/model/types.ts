@@ -18,7 +18,44 @@ export interface Quote {
 	preMarketPrice?: number;
 	preMarketChange?: number;
 	preMarketChangePercent?: number;
+	postMarketPrice?: number;
+	postMarketChange?: number;
+	postMarketChangePercent?: number;
 	marketCap?: number;
+}
+
+export interface ExtendedHours {
+	label: string;
+	price: number;
+	changePercent?: number;
+}
+
+/**
+ * Resolve the active extended-hours session (pre-market or after-hours/overnight)
+ * for a quote, if any. Yahoo's marketState cycles PRE/PREPRE → REGULAR → POST/POSTPOST
+ * → CLOSED. When a session ends (evenings, weekends) the state flips to CLOSED but the
+ * last extended-hours print is kept in pre/postMarketPrice — so we surface whichever
+ * field Yahoo populated rather than gating strictly on the live session.
+ */
+export function getExtendedHours(quote: Quote | null | undefined): ExtendedHours | null {
+	if (!quote) return null;
+	const state = quote.marketState ?? "";
+	if (state.startsWith("PRE") && quote.preMarketPrice) {
+		return {
+			label: "Pre-Market",
+			price: quote.preMarketPrice,
+			changePercent: quote.preMarketChangePercent,
+		};
+	}
+	// POST/POSTPOST is the live after-hours session; CLOSED carries the last print.
+	if ((state.startsWith("POST") || state === "CLOSED") && quote.postMarketPrice) {
+		return {
+			label: "After Hours",
+			price: quote.postMarketPrice,
+			changePercent: quote.postMarketChangePercent,
+		};
+	}
+	return null;
 }
 
 export interface HistoricalPoint {

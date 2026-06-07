@@ -2,7 +2,7 @@
 
 import { useDeribitQuotes } from "@/entities/asset/api/deribit-queries";
 import { useOptions, useQuotes } from "@/entities/asset/api/queries";
-import { inferAssetType } from "@/entities/asset/model/types";
+import { getExtendedHours, inferAssetType } from "@/entities/asset/model/types";
 import { useEffectiveIsin } from "@/entities/isins/model/helpers";
 import { isIsinCompatible } from "@/entities/watchlist/model/helpers";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
@@ -34,6 +34,7 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 	const { data: deribitQuotes = [] } = useDeribitQuotes(isDeribit ? [ticker] : []);
 
 	const spotQuote = quotes.find((q) => q.symbol === ticker);
+	const extendedHours = getExtendedHours(spotQuote);
 	const futuresQuote =
 		!isDeribit && item?.futuresTicker ? quotes.find((q) => q.symbol === item.futuresTicker) : null;
 	const deribitQuote = isDeribit ? deribitQuotes.find((q) => q.symbol === ticker) : null;
@@ -211,19 +212,19 @@ export function AssetDetailSheet({ ticker, onClose }: AssetDetailSheetProps) {
 										currency={futuresQuote.currency}
 									/>
 								)}
-								{spotQuote?.marketState === "PRE" && spotQuote?.preMarketPrice && (
+								{extendedHours && (
 									<div className="rounded-lg bg-[#111118] p-3">
-										<span className="text-[11px] text-zinc-500 block">Pre-Market</span>
+										<span className="text-[11px] text-zinc-500 block">{extendedHours.label}</span>
 										<div className="flex items-baseline gap-1.5">
 											<span className="text-sm tabular-nums text-zinc-200">
-												{formatPrice(spotQuote.preMarketPrice, currency)}
+												{formatPrice(extendedHours.price, currency)}
 											</span>
-											{spotQuote.preMarketChangePercent != null && (
+											{extendedHours.changePercent != null && (
 												<span
-													className={`text-[10px] tabular-nums ${spotQuote.preMarketChangePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}
+													className={`text-[10px] tabular-nums ${extendedHours.changePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}
 												>
-													{spotQuote.preMarketChangePercent >= 0 ? "+" : ""}
-													{spotQuote.preMarketChangePercent.toFixed(2)}%
+													{extendedHours.changePercent >= 0 ? "+" : ""}
+													{extendedHours.changePercent.toFixed(2)}%
 												</span>
 											)}
 										</div>

@@ -19,6 +19,9 @@ interface YFQuote {
 	preMarketPrice?: number;
 	preMarketChange?: number;
 	preMarketChangePercent?: number;
+	postMarketPrice?: number;
+	postMarketChange?: number;
+	postMarketChangePercent?: number;
 	marketCap?: number;
 }
 
@@ -70,6 +73,9 @@ export async function GET(request: Request) {
 						preMarketPrice: q.preMarketPrice,
 						preMarketChange: q.preMarketChange,
 						preMarketChangePercent: q.preMarketChangePercent,
+						postMarketPrice: q.postMarketPrice,
+						postMarketChange: q.postMarketChange,
+						postMarketChangePercent: q.postMarketChangePercent,
 						marketCap: q.marketCap,
 					};
 				}

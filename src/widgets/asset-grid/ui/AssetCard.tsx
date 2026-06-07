@@ -6,7 +6,7 @@ import {
 	useDeribitQuotes,
 } from "@/entities/asset/api/deribit-queries";
 import { useChart, useQuotes } from "@/entities/asset/api/queries";
-import { inferAssetType } from "@/entities/asset/model/types";
+import { getExtendedHours, inferAssetType } from "@/entities/asset/model/types";
 import { useChartPreferencesStore } from "@/entities/chart-preferences/model/store";
 import { useEffectiveIsin } from "@/entities/isins/model/helpers";
 import { isIsinCompatible } from "@/entities/watchlist/model/helpers";
@@ -55,6 +55,7 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 	const chartLoading = isDeribit ? deribitChartLoading : yahooChartLoading;
 
 	const spotQuote = yahooQuotes.find((q) => q.symbol === item.ticker);
+	const extendedHours = getExtendedHours(spotQuote);
 	const futuresQuote =
 		!isDeribit && item.futuresTicker
 			? yahooQuotes.find((q) => q.symbol === item.futuresTicker)
@@ -241,20 +242,20 @@ export function AssetCard({ item, onOpenDetail }: AssetCardProps) {
 								</span>
 							</div>
 						</div>
-						{spotQuote?.marketState === "PRE" && spotQuote?.preMarketPrice ? (
+						{extendedHours ? (
 							<div className="flex items-center justify-between">
-								<span className="text-[11px] text-zinc-500">Pre-Market</span>
+								<span className="text-[11px] text-zinc-500">{extendedHours.label}</span>
 								<div className="flex items-center gap-2">
-									{spotQuote.preMarketChangePercent != null && (
+									{extendedHours.changePercent != null && (
 										<span
-											className={`text-[11px] tabular-nums ${spotQuote.preMarketChangePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}
+											className={`text-[11px] tabular-nums ${extendedHours.changePercent >= 0 ? "text-emerald-500" : "text-red-500"}`}
 										>
-											{spotQuote.preMarketChangePercent >= 0 ? "+" : ""}
-											{spotQuote.preMarketChangePercent.toFixed(2)}%
+											{extendedHours.changePercent >= 0 ? "+" : ""}
+											{extendedHours.changePercent.toFixed(2)}%
 										</span>
 									)}
 									<span className="text-sm tabular-nums text-zinc-300">
-										{formatPrice(spotQuote.preMarketPrice, spotQuote.currency)}
+										{formatPrice(extendedHours.price, spotQuote?.currency)}
 									</span>
 								</div>
 							</div>
