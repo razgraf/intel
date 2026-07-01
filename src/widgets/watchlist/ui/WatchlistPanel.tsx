@@ -12,6 +12,7 @@ import { useWatchlistHydrated, useWatchlistStore } from "@/entities/watchlist/mo
 import { CountdownDialog } from "@/features/countdown/ui/CountdownDialog";
 import { TargetsDialog } from "@/features/targets/ui/TargetsDialog";
 import { TickerSearchInput } from "@/features/ticker-search/ui/TickerSearchInput";
+import { cn } from "@/lib/utils";
 import { createCountdownItem } from "@/shared/lib/countdown";
 import { createTargetsItem } from "@/shared/lib/targets";
 import { Reorder } from "framer-motion";
@@ -22,9 +23,15 @@ interface WatchlistPanelProps {
 	selectedTicker?: string;
 	onSelect?: (ticker: string) => void;
 	onOpenDetail?: (ticker: string) => void;
+	className?: string;
 }
 
-export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: WatchlistPanelProps) {
+export function WatchlistPanel({
+	selectedTicker,
+	onSelect,
+	onOpenDetail,
+	className,
+}: WatchlistPanelProps) {
 	const hydrated = useWatchlistHydrated();
 	const items = useWatchlistStore((s) => s.items);
 	const add = useWatchlistStore((s) => s.add);
@@ -49,7 +56,7 @@ export function WatchlistPanel({ selectedTicker, onSelect, onOpenDetail }: Watch
 	if (!hydrated) return null;
 
 	return (
-		<div className="flex flex-col h-full">
+		<div className={cn("flex flex-col h-full", className)}>
 			<div className="px-2 pb-2">
 				<TickerSearchInput
 					onSelect={add}

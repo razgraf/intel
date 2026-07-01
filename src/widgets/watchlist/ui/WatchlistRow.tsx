@@ -14,6 +14,7 @@ import { ASSET_TYPE_COLORS } from "@/shared/lib/constants";
 import { getCountdownDate, getCountdownStatus } from "@/shared/lib/countdown";
 import { formatPercent, formatPrice } from "@/shared/lib/format";
 import { MAX_TARGET_ROWS } from "@/shared/lib/targets";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { Reorder, useDragControls } from "framer-motion";
 import { Clock3 } from "lucide-react";
 import { GripVertical, X } from "lucide-react";
@@ -37,6 +38,7 @@ export function WatchlistRow({
 	onOpenDetail,
 }: WatchlistRowProps) {
 	const remove = useWatchlistStore((s) => s.remove);
+	const [confirmOpen, setConfirmOpen] = useState(false);
 	const targetsIndex = useWatchlistStore((s) =>
 		isTargetsItem(item)
 			? s.items.filter(isTargetsItem).findIndex((i) => i.ticker === item.ticker)
@@ -168,13 +170,30 @@ export function WatchlistRow({
 					type="button"
 					onClick={(e) => {
 						e.stopPropagation();
-						remove(item.ticker);
+						setConfirmOpen(true);
 					}}
 					className="rounded p-0.5 text-zinc-600 hover:text-red-400 hover:bg-zinc-800 transition-colors"
 				>
 					<X className="h-3 w-3" />
 				</button>
 			</div>
+			<ConfirmDialog
+				open={confirmOpen}
+				onClose={() => setConfirmOpen(false)}
+				onConfirm={() => {
+					remove(item.ticker);
+					setConfirmOpen(false);
+				}}
+				title="Remove item"
+				description={
+					<>
+						Remove <span className="font-medium text-zinc-200">{item.label ?? item.ticker}</span>{" "}
+						from your watchlist?
+					</>
+				}
+				confirmLabel="Remove"
+				destructive
+			/>
 		</Reorder.Item>
 	);
 }

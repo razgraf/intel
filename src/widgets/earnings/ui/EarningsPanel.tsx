@@ -2,6 +2,7 @@
 
 import { useEarnings } from "@/entities/asset/api/queries";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
+import { cn } from "@/lib/utils";
 import { getUpcomingCPI } from "@/shared/lib/cpi";
 import { getUpcomingFOMC } from "@/shared/lib/fomc";
 import { Dialog } from "@/shared/ui/Dialog";
@@ -76,7 +77,13 @@ type InlineItem = {
 	hour?: string;
 };
 
-export function EventsPanel() {
+interface EventsPanelProps {
+	className?: string;
+	hideHeader?: boolean;
+	hideWhenEmpty?: boolean;
+}
+
+export function EventsPanel({ className, hideHeader, hideWhenEmpty }: EventsPanelProps) {
 	const items = useWatchlistStore((s) => s.items);
 	const symbols = items.map((i) => i.ticker);
 	const { data: earnings = [] } = useEarnings(symbols);
@@ -128,8 +135,9 @@ export function EventsPanel() {
 	const totalCount = sortedEarnings.length + allFOMC.length + allCPI.length;
 
 	if (!now || inlineItems.length === 0) {
+		if (hideWhenEmpty) return null;
 		return (
-			<div className="px-3 py-2">
+			<div className={cn("px-3 py-2", className)}>
 				<div className="flex items-center gap-1.5">
 					<Calendar className="h-3 w-3 text-zinc-500" />
 					<span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
@@ -142,24 +150,26 @@ export function EventsPanel() {
 	}
 
 	return (
-		<div className="px-3 py-2">
-			<div className="flex items-center justify-between mb-2">
-				<div className="flex items-center gap-1.5">
-					<Calendar className="h-3 w-3 text-zinc-500" />
-					<span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
-						Events / Earnings
-					</span>
+		<div className={cn("px-3 py-2", className)}>
+			{!hideHeader && (
+				<div className="flex items-center justify-between mb-2">
+					<div className="flex items-center gap-1.5">
+						<Calendar className="h-3 w-3 text-zinc-500" />
+						<span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+							Events / Earnings
+						</span>
+					</div>
+					{totalCount > inlineItems.length && (
+						<button
+							type="button"
+							onClick={() => setDialogOpen(true)}
+							className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors"
+						>
+							Show all ({totalCount})
+						</button>
+					)}
 				</div>
-				{totalCount > inlineItems.length && (
-					<button
-						type="button"
-						onClick={() => setDialogOpen(true)}
-						className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors"
-					>
-						Show all ({totalCount})
-					</button>
-				)}
-			</div>
+			)}
 			<div className="space-y-1">
 				{inlineItems.map((e) => (
 					<EventRow
