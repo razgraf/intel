@@ -3,6 +3,7 @@
 import { getEffectiveIsins } from "@/entities/isins/model/helpers";
 import { useIsinsStore } from "@/entities/isins/model/store";
 import { useWatchlistStore } from "@/entities/watchlist/model/store";
+import { clearSessionMarker } from "@/features/account/lib/session-marker";
 import { encodeWatchlist } from "@/features/watchlist-sync/lib/encode";
 import { useAccountsEnabled } from "@/shared/lib/accounts-context";
 import { Dialog } from "@/shared/ui/Dialog";
@@ -164,6 +165,7 @@ function ClerkAuthSection() {
 					<SignOutButton>
 						<button
 							type="button"
+							onClick={clearSessionMarker}
 							className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
 						>
 							<LogOut className="h-3.5 w-3.5" />

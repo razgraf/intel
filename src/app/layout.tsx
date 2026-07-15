@@ -4,6 +4,7 @@ import { isAccountsEnabled } from "@/shared/lib/accounts-config";
 import { AccountsContextProvider } from "@/shared/lib/accounts-context";
 import { DevTools } from "@/shared/ui/DevTools";
 import { ProdTools } from "@/shared/ui/ProdTools";
+import { Toaster } from "@/shared/ui/Toaster";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import type { Metadata } from "next";
@@ -34,6 +35,8 @@ export default function RootLayout({
 	const inner = (
 		<>
 			<QueryProvider>{children}</QueryProvider>
+			{/* Toaster must mount before CloudSyncProvider: sonner drops toasts fired before it subscribes. */}
+			<Toaster />
 			<CloudSyncProvider />
 			<ProdTools />
 			<DevTools />

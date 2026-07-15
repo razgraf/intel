@@ -23,517 +23,551 @@ import { TipsPanel } from "@/widgets/tips/ui/TipsPanel";
 import { WatchlistPanel } from "@/widgets/watchlist/ui/WatchlistPanel";
 import { useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Github, PanelRight, Settings, User, X } from "lucide-react";
+import {
+  ArrowUpRight,
+  Github,
+  PanelRight,
+  QrCodeIcon,
+  Settings,
+  User,
+  X,
+} from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function DashboardLayout() {
-	const [selectedTicker, setSelectedTicker] = useState<string | undefined>();
-	const [detailTicker, setDetailTicker] = useState<string | null>(null);
-	const [sidebarOpen, setSidebarOpen] = useState(false);
-	const [settingsOpen, setSettingsOpen] = useState(false);
-	const [accountOpen, setAccountOpen] = useState(false);
-	const [isinsOpen, setIsinsOpen] = useState(false);
-	const [qrOpen, setQrOpen] = useState(false);
-	const [restoreOpen, setRestoreOpen] = useState(false);
-	const [restoreUrl, setRestoreUrl] = useState("");
-	const [restorePayload, setRestorePayload] = useState<string | null>(null);
-	const [localTime, setLocalTime] = useState("");
-	const [timezone, setTimezone] = useState("");
-	const watchlistItems = useWatchlistStore((s) => s.items);
-	const isinsMap = useIsinsStore((s) => s.isins);
-	const resetAllTimeframes = useChartPreferencesStore((s) => s.resetAll);
-	const accountsEnabled = useAccountsEnabled();
+  const [selectedTicker, setSelectedTicker] = useState<string | undefined>();
+  const [detailTicker, setDetailTicker] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [isinsOpen, setIsinsOpen] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
+  const [restoreOpen, setRestoreOpen] = useState(false);
+  const [restoreUrl, setRestoreUrl] = useState("");
+  const [restorePayload, setRestorePayload] = useState<string | null>(null);
+  const [localTime, setLocalTime] = useState("");
+  const [timezone, setTimezone] = useState("");
+  const watchlistItems = useWatchlistStore((s) => s.items);
+  const isinsMap = useIsinsStore((s) => s.isins);
+  const resetAllTimeframes = useChartPreferencesStore((s) => s.resetAll);
+  const accountsEnabled = useAccountsEnabled();
 
-	useEffect(() => {
-		setLocalTime(formatLocalTime(new Date()));
-		setTimezone(getLocalTimezone());
-		const interval = setInterval(() => setLocalTime(formatLocalTime(new Date())), 60_000);
-		return () => clearInterval(interval);
-	}, []);
+  useEffect(() => {
+    setLocalTime(formatLocalTime(new Date()));
+    setTimezone(getLocalTimezone());
+    const interval = setInterval(
+      () => setLocalTime(formatLocalTime(new Date())),
+      60_000,
+    );
+    return () => clearInterval(interval);
+  }, []);
 
-	const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
-	const exportUrl = useMemo(() => {
-		if (typeof window === "undefined") return "";
-		const effectiveIsins = getEffectiveIsins(watchlistItems, isinsMap);
-		const payload = encodeWatchlist(watchlistItems, effectiveIsins);
-		return `${window.location.origin}${window.location.pathname}?watchlist=${payload}`;
-	}, [watchlistItems, isinsMap]);
+  const exportUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    const effectiveIsins = getEffectiveIsins(watchlistItems, isinsMap);
+    const payload = encodeWatchlist(watchlistItems, effectiveIsins);
+    return `${window.location.origin}${window.location.pathname}?watchlist=${payload}`;
+  }, [watchlistItems, isinsMap]);
 
-	const handleOpenPreview = useCallback(() => {
-		setSettingsOpen(false);
-		window.open("/preview", "_blank", "noopener,noreferrer");
-	}, []);
+  const handleOpenPreview = useCallback(() => {
+    setSettingsOpen(false);
+    window.open("/preview", "_blank", "noopener,noreferrer");
+  }, []);
 
-	const handleRestoreConfirm = useCallback(() => {
-		try {
-			const url = new URL(restoreUrl);
-			const payload = url.searchParams.get("watchlist");
-			if (payload) {
-				setRestorePayload(payload);
-			}
-		} catch {
-			// invalid URL — ignore
-		}
-		setRestoreOpen(false);
-		setRestoreUrl("");
-	}, [restoreUrl]);
+  const handleRestoreConfirm = useCallback(() => {
+    try {
+      const url = new URL(restoreUrl);
+      const payload = url.searchParams.get("watchlist");
+      if (payload) {
+        setRestorePayload(payload);
+      }
+    } catch {
+      // invalid URL — ignore
+    }
+    setRestoreOpen(false);
+    setRestoreUrl("");
+  }, [restoreUrl]);
 
-	const clearRestorePayload = useCallback(() => {
-		setRestorePayload(null);
-	}, []);
+  const clearRestorePayload = useCallback(() => {
+    setRestorePayload(null);
+  }, []);
 
-	useEffect(() => {
-		function handleEscape(e: KeyboardEvent) {
-			if (e.key === "Escape") {
-				if (detailTicker) setDetailTicker(null);
-				else if (sidebarOpen) setSidebarOpen(false);
-			}
-		}
-		document.addEventListener("keydown", handleEscape);
-		return () => document.removeEventListener("keydown", handleEscape);
-	}, [detailTicker, sidebarOpen]);
+  useEffect(() => {
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        if (detailTicker) setDetailTicker(null);
+        else if (sidebarOpen) setSidebarOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [detailTicker, sidebarOpen]);
 
-	return (
-		<div className="flex flex-col h-screen bg-[#0a0a0f] text-zinc-100">
-			{/* Top bar */}
-			<header className="flex items-center justify-between border-b border-[#1e1e2e] px-4 py-2 shrink-0">
-				<div className="flex items-center gap-2">
-					<span className="text-md font-bold tracking-tight">Intel</span>
-				</div>
+  return (
+    <div className="flex flex-col h-screen bg-[#0a0a0f] text-zinc-100">
+      {/* Top bar */}
+      <header className="flex items-center justify-between border-b border-[#1e1e2e] px-4 py-2 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-md font-bold tracking-tight">Intel</span>
+        </div>
 
-				{/* Exchange status pills */}
-				<div className="hidden md:flex items-center gap-1.5">
-					<ExchangeStatusPills />
-				</div>
+        {/* Exchange status pills */}
+        <div className="hidden md:flex items-center gap-1.5">
+          <ExchangeStatusPills />
+        </div>
 
-				<div className="flex items-center gap-2 text-xs text-zinc-500">
-					<span className="tabular-nums">{localTime}</span>
-					<span>{timezone}</span>
-					<AccountIconButton onClick={() => setAccountOpen(true)} />
-					<button
-						type="button"
-						className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
-						onClick={() => setSettingsOpen(true)}
-						aria-label="Settings"
-					>
-						<Settings className="h-4 w-4" />
-					</button>
-					<button
-						type="button"
-						className="md:hidden p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
-						onClick={() => setSidebarOpen((o) => !o)}
-						aria-label="Toggle sidebar"
-					>
-						<PanelRight className="h-4 w-4" />
-					</button>
-				</div>
-			</header>
+        <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <span className="tabular-nums">{localTime}</span>
+          <span>{timezone}</span>
+          <AccountIconButton onClick={() => setAccountOpen(true)} />
+          <button
+            type="button"
+            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            className="md:hidden p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+            onClick={() => setSidebarOpen((o) => !o)}
+            aria-label="Toggle sidebar"
+          >
+            <PanelRight className="h-4 w-4" />
+          </button>
+        </div>
+      </header>
 
-			{/* Main content */}
-			<div className="flex flex-1 min-h-0">
-				{/* Asset Grid */}
-				<main className="flex-1 overflow-y-auto">
-					{/* Mobile-only: surface watchlist + events at top of the list */}
-					<div className="md:hidden flex flex-col gap-3 p-3 pb-0">
-						<WatchlistPanel
-							className="rounded-xl border border-[#1e1e2e] bg-[#111118] py-2"
-							selectedTicker={selectedTicker}
-							onSelect={setSelectedTicker}
-							onOpenDetail={setDetailTicker}
-						/>
-						<EventsPanel
-							className="rounded-xl border border-[#1e1e2e] bg-[#111118]"
-							hideHeader
-							hideWhenEmpty
-						/>
-					</div>
-					<AssetGrid onOpenDetail={setDetailTicker} />
-				</main>
+      {/* Main content */}
+      <div className="flex flex-1 min-h-0">
+        {/* Asset Grid */}
+        <main className="flex-1 overflow-y-auto">
+          {/* Mobile-only: surface watchlist + events at top of the list */}
+          <div className="md:hidden flex flex-col gap-3 p-3 pb-0">
+            <WatchlistPanel
+              className="rounded-xl border border-[#1e1e2e] bg-[#111118] py-2"
+              selectedTicker={selectedTicker}
+              onSelect={setSelectedTicker}
+              onOpenDetail={setDetailTicker}
+            />
+            <EventsPanel
+              className="rounded-xl border border-[#1e1e2e] bg-[#111118]"
+              hideHeader
+              hideWhenEmpty
+            />
+          </div>
+          <AssetGrid onOpenDetail={setDetailTicker} />
+        </main>
 
-				{/* Right sidebar — static on md+, slide-out drawer on <md */}
-				<aside className="hidden md:flex w-80 border-l border-[#1e1e2e] flex-col shrink-0 overflow-hidden">
-					<SidebarContent
-						selectedTicker={selectedTicker}
-						onSelect={setSelectedTicker}
-						onOpenDetail={setDetailTicker}
-						onOpenIsins={() => setIsinsOpen(true)}
-						onOpenSettings={() => setSettingsOpen(true)}
-						onOpenAccount={() => setAccountOpen(true)}
-					/>
-				</aside>
+        {/* Right sidebar — static on md+, slide-out drawer on <md */}
+        <aside className="hidden md:flex w-80 border-l border-[#1e1e2e] flex-col shrink-0 overflow-hidden">
+          <SidebarContent
+            selectedTicker={selectedTicker}
+            onSelect={setSelectedTicker}
+            onOpenDetail={setDetailTicker}
+            onOpenIsins={() => setIsinsOpen(true)}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onOpenAccount={() => setAccountOpen(true)}
+          />
+        </aside>
 
-				{/* Mobile drawer */}
-				<AnimatePresence>
-					{sidebarOpen && (
-						<>
-							<motion.div
-								className="fixed inset-0 z-40 bg-black/60 md:hidden"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								onClick={closeSidebar}
-							/>
-							<motion.aside
-								className="fixed right-0 top-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[#0a0a0f] border-l border-[#1e1e2e] flex flex-col overflow-hidden md:hidden"
-								initial={{ x: "100%" }}
-								animate={{ x: 0 }}
-								exit={{ x: "100%" }}
-								transition={{ type: "spring", damping: 25, stiffness: 300 }}
-							>
-								<SidebarContent
-									selectedTicker={selectedTicker}
-									onSelect={setSelectedTicker}
-									onOpenDetail={setDetailTicker}
-									onOpenIsins={() => {
-										setSidebarOpen(false);
-										setIsinsOpen(true);
-									}}
-									onOpenSettings={() => {
-										setSidebarOpen(false);
-										setSettingsOpen(true);
-									}}
-									onOpenAccount={() => {
-										setSidebarOpen(false);
-										setAccountOpen(true);
-									}}
-								/>
-							</motion.aside>
-						</>
-					)}
-				</AnimatePresence>
-			</div>
+        {/* Mobile drawer */}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <>
+              <motion.div
+                className="fixed inset-0 z-40 bg-black/60 md:hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={closeSidebar}
+              />
+              <motion.aside
+                className="fixed right-0 top-0 bottom-0 z-50 w-80 max-w-[85vw] bg-[#0a0a0f] border-l border-[#1e1e2e] flex flex-col overflow-hidden md:hidden"
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              >
+                <SidebarContent
+                  selectedTicker={selectedTicker}
+                  onSelect={setSelectedTicker}
+                  onOpenDetail={setDetailTicker}
+                  onOpenIsins={() => {
+                    setSidebarOpen(false);
+                    setIsinsOpen(true);
+                  }}
+                  onOpenSettings={() => {
+                    setSidebarOpen(false);
+                    setSettingsOpen(true);
+                  }}
+                  onOpenAccount={() => {
+                    setSidebarOpen(false);
+                    setAccountOpen(true);
+                  }}
+                />
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
 
-			{/* Detail sheet */}
-			<AnimatePresence>
-				{detailTicker && (
-					<AssetDetailSheet ticker={detailTicker} onClose={() => setDetailTicker(null)} />
-				)}
-			</AnimatePresence>
+      {/* Detail sheet */}
+      <AnimatePresence>
+        {detailTicker && (
+          <AssetDetailSheet
+            ticker={detailTicker}
+            onClose={() => setDetailTicker(null)}
+          />
+        )}
+      </AnimatePresence>
 
-			{/* Settings dialog */}
-			<Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
-				<div className="p-5 space-y-4">
-					<div className="flex items-center justify-between">
-						<h2 className="text-sm font-semibold text-zinc-100">Settings</h2>
-						<button
-							type="button"
-							onClick={() => setSettingsOpen(false)}
-							className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
-							aria-label="Close"
-						>
-							<X className="h-4 w-4" />
-						</button>
-					</div>
+      {/* Settings dialog */}
+      <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+        <div className="p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-zinc-100">Settings</h2>
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(false)}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
 
-					<div className="space-y-2">
-						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Preview</h3>
-						<button
-							type="button"
-							onClick={handleOpenPreview}
-							className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-zinc-800 px-3 py-2 text-xs text-zinc-200 transition-colors hover:bg-zinc-700"
-						>
-							<ArrowUpRight className="h-3.5 w-3.5" />
-							Show watchlist examples
-						</button>
-					</div>
+          <div className="space-y-2">
+            <h3 className="text-[10px] uppercase font-bold text-zinc-500">
+              Preview
+            </h3>
+            <button
+              type="button"
+              onClick={handleOpenPreview}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-zinc-800 px-3 py-2 text-xs text-zinc-200 transition-colors hover:bg-zinc-700"
+            >
+              <ArrowUpRight className="h-3.5 w-3.5" />
+              Show watchlist examples
+            </button>
+          </div>
 
-					<div className="space-y-2">
-						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Reset Time View</h3>
-						<div className="grid grid-cols-3 gap-2">
-							{(["1D", "1W", "1M"] as const).map((tf) => (
-								<button
-									key={tf}
-									type="button"
-									onClick={() => resetAllTimeframes(tf as Timeframe, watchlistItems)}
-									className="flex items-center justify-center px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
-								>
-									{tf}
-								</button>
-							))}
-						</div>
-					</div>
+          <div className="space-y-2">
+            <h3 className="text-[10px] uppercase font-bold text-zinc-500">
+              Reset Time View
+            </h3>
+            <div className="grid grid-cols-3 gap-2">
+              {(["1D", "1W", "1M"] as const).map((tf) => (
+                <button
+                  key={tf}
+                  type="button"
+                  onClick={() =>
+                    resetAllTimeframes(tf as Timeframe, watchlistItems)
+                  }
+                  className="flex items-center justify-center px-3 py-2 text-xs rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
+                >
+                  {tf}
+                </button>
+              ))}
+            </div>
+          </div>
 
-					<div className="rounded-lg border border-[#1e1e2e] bg-[#111118] p-3 space-y-2">
-						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Technical Details</h3>
-						<dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-[11px]">
-							<dt className="text-zinc-500">Polling interval</dt>
-							<dd className="text-zinc-300 text-right tabular-nums">60s</dd>
-							<dt className="text-zinc-500">Chart cache (stale time)</dt>
-							<dd className="text-zinc-300 text-right tabular-nums">60s</dd>
-							<dt className="text-zinc-500">Search cache</dt>
-							<dd className="text-zinc-300 text-right tabular-nums">30s</dd>
-							<dt className="text-zinc-500">Options cache</dt>
-							<dd className="text-zinc-300 text-right tabular-nums">120s</dd>
-							<dt className="text-zinc-500">Earnings cache</dt>
-							<dd className="text-zinc-300 text-right tabular-nums">6h</dd>
-							<dt className="text-zinc-500">Deribit preview cache</dt>
-							<dd className="text-zinc-300 text-right tabular-nums">5m</dd>
-							<dt className="text-zinc-500">Watchlist items</dt>
-							<dd className="text-zinc-300 text-right tabular-nums">{watchlistItems.length}</dd>
-							<dt className="text-zinc-500">Account system</dt>
-							<dd
-								className={cn(
-									"text-right tabular-nums",
-									accountsEnabled ? "text-emerald-400" : "text-zinc-500",
-								)}
-							>
-								{accountsEnabled ? "On" : "Off"}
-							</dd>
-						</dl>
-					</div>
+          <div className="rounded-lg border border-[#1e1e2e] bg-[#111118] p-3 space-y-2">
+            <h3 className="text-[10px] uppercase font-bold text-zinc-500">
+              Technical Details
+            </h3>
+            <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-[11px]">
+              <dt className="text-zinc-500">Polling interval</dt>
+              <dd className="text-zinc-300 text-right tabular-nums">60s</dd>
+              <dt className="text-zinc-500">Chart cache (stale time)</dt>
+              <dd className="text-zinc-300 text-right tabular-nums">60s</dd>
+              <dt className="text-zinc-500">Search cache</dt>
+              <dd className="text-zinc-300 text-right tabular-nums">30s</dd>
+              <dt className="text-zinc-500">Options cache</dt>
+              <dd className="text-zinc-300 text-right tabular-nums">120s</dd>
+              <dt className="text-zinc-500">Earnings cache</dt>
+              <dd className="text-zinc-300 text-right tabular-nums">6h</dd>
+              <dt className="text-zinc-500">Deribit preview cache</dt>
+              <dd className="text-zinc-300 text-right tabular-nums">5m</dd>
+              <dt className="text-zinc-500">Watchlist items</dt>
+              <dd className="text-zinc-300 text-right tabular-nums">
+                {watchlistItems.length}
+              </dd>
+              <dt className="text-zinc-500">Account system</dt>
+              <dd
+                className={cn(
+                  "text-right tabular-nums",
+                  accountsEnabled ? "text-emerald-400" : "text-zinc-500",
+                )}
+              >
+                {accountsEnabled ? "On" : "Off"}
+              </dd>
+            </dl>
+          </div>
 
-					<div className="space-y-2">
-						<h3 className="text-[10px] uppercase font-bold text-zinc-500">Source & Feedback</h3>
-						<a
-							href="https://github.com/razgraf/intel"
-							target="_blank"
-							rel="noreferrer"
-							className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-zinc-800 px-3 py-2 text-xs text-zinc-200 transition-colors hover:bg-zinc-700"
-						>
-							<Github className="h-3.5 w-3.5" />
-							View on GitHub — fork or open an issue
-						</a>
-					</div>
+          <div className="space-y-2">
+            <h3 className="text-[10px] uppercase font-bold text-zinc-500">
+              Source & Feedback
+            </h3>
+            <a
+              href="https://github.com/razgraf/intel"
+              target="_blank"
+              rel="noreferrer"
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-zinc-800 px-3 py-2 text-xs text-zinc-200 transition-colors hover:bg-zinc-700"
+            >
+              <Github className="h-3.5 w-3.5" />
+              View on GitHub — fork or open an issue
+            </a>
+          </div>
 
-					<p className="text-center text-[12px] text-zinc-600 pt-1">
-						Made by{" "}
-						<a
-							href="https://x.com/razgraf"
-							target="_blank"
-							rel="noreferrer"
-							className="text-zinc-400 hover:text-zinc-200 transition-colors"
-						>
-							@razgraf
-						</a>
-					</p>
-				</div>
-			</Dialog>
+          <p className="text-center text-[12px] text-zinc-600 pt-1">
+            Made by{" "}
+            <a
+              href="https://x.com/razgraf"
+              target="_blank"
+              rel="noreferrer"
+              className="text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              @razgraf
+            </a>
+          </p>
+        </div>
+      </Dialog>
 
-			{/* ISINs dialog */}
-			<IsinsDialog open={isinsOpen} onClose={() => setIsinsOpen(false)} />
+      {/* ISINs dialog */}
+      <IsinsDialog open={isinsOpen} onClose={() => setIsinsOpen(false)} />
 
-			{/* Account dialog */}
-			<AccountDialog
-				open={accountOpen}
-				onClose={() => setAccountOpen(false)}
-				onOpenQr={() => {
-					setAccountOpen(false);
-					setQrOpen(true);
-				}}
-				onOpenRestore={() => {
-					setAccountOpen(false);
-					setRestoreOpen(true);
-				}}
-			/>
+      {/* Account dialog */}
+      <AccountDialog
+        open={accountOpen}
+        onClose={() => setAccountOpen(false)}
+        onOpenQr={() => {
+          setAccountOpen(false);
+          setQrOpen(true);
+        }}
+        onOpenRestore={() => {
+          setAccountOpen(false);
+          setRestoreOpen(true);
+        }}
+      />
 
-			{/* QR code dialog */}
-			<Dialog open={qrOpen} onClose={() => setQrOpen(false)}>
-				<div className="p-5 space-y-4">
-					<div className="flex items-center justify-between">
-						<h2 className="text-sm font-semibold text-zinc-100">QR Code</h2>
-						<button
-							type="button"
-							onClick={() => setQrOpen(false)}
-							className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
-							aria-label="Close"
-						>
-							<X className="h-4 w-4" />
-						</button>
-					</div>
-					<div className="flex justify-center">
-						<div className="rounded-lg border border-[#1e1e2e] bg-white p-3">
-							<QRCodeSVG
-								value={exportUrl}
-								size={256}
-								bgColor="#ffffff"
-								fgColor="#0a0a0f"
-								level="L"
-							/>
-						</div>
-					</div>
-					<p className="text-[10px] text-zinc-600 text-center">
-						Scan to import this watchlist on another device
-					</p>
-				</div>
-			</Dialog>
+      {/* QR code dialog */}
+      <Dialog open={qrOpen} onClose={() => setQrOpen(false)}>
+        <div className="p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-zinc-100">QR Code</h2>
+            <button
+              type="button"
+              onClick={() => setQrOpen(false)}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex justify-center">
+            <div className="rounded-lg border border-[#1e1e2e] bg-white p-3">
+              <QRCodeSVG
+                value={exportUrl}
+                size={256}
+                bgColor="#ffffff"
+                fgColor="#0a0a0f"
+                level="L"
+              />
+            </div>
+          </div>
+          <p className="text-[10px] text-zinc-600 text-center">
+            Scan to import this watchlist on another device
+          </p>
+        </div>
+      </Dialog>
 
-			{/* Restore watchlist dialog */}
-			<Dialog
-				open={restoreOpen}
-				onClose={() => {
-					setRestoreOpen(false);
-					setRestoreUrl("");
-				}}
-			>
-				<div className="p-5 space-y-4">
-					<div className="flex items-center justify-between">
-						<h2 className="text-sm font-semibold text-zinc-100">Restore Watchlist</h2>
-						<button
-							type="button"
-							onClick={() => {
-								setRestoreOpen(false);
-								setRestoreUrl("");
-							}}
-							className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
-							aria-label="Close"
-						>
-							<X className="h-4 w-4" />
-						</button>
-					</div>
-					<p className="text-xs text-zinc-400">
-						Paste a watchlist URL to restore it on this device.
-					</p>
-					<input
-						type="url"
-						value={restoreUrl}
-						onChange={(e) => setRestoreUrl(e.target.value)}
-						placeholder="https://example.com/?watchlist=..."
-						className="w-full rounded-lg border border-[#1e1e2e] bg-[#111118] px-3 py-2 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-600"
-						onKeyDown={(e) => {
-							if (e.key === "Enter" && restoreUrl) handleRestoreConfirm();
-						}}
-					/>
-					<div className="flex gap-2 justify-end">
-						<button
-							type="button"
-							onClick={() => {
-								setRestoreOpen(false);
-								setRestoreUrl("");
-							}}
-							className="px-3 py-1.5 text-xs rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
-						>
-							Cancel
-						</button>
-						<button
-							type="button"
-							onClick={handleRestoreConfirm}
-							disabled={!restoreUrl}
-							className="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-						>
-							Confirm
-						</button>
-					</div>
-				</div>
-			</Dialog>
+      {/* Restore watchlist dialog */}
+      <Dialog
+        open={restoreOpen}
+        onClose={() => {
+          setRestoreOpen(false);
+          setRestoreUrl("");
+        }}
+      >
+        <div className="p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-zinc-100">
+              Restore Watchlist
+            </h2>
+            <button
+              type="button"
+              onClick={() => {
+                setRestoreOpen(false);
+                setRestoreUrl("");
+              }}
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <p className="text-xs text-zinc-400">
+            Paste a watchlist URL to restore it on this device.
+          </p>
+          <input
+            type="url"
+            value={restoreUrl}
+            onChange={(e) => setRestoreUrl(e.target.value)}
+            placeholder="https://example.com/?watchlist=..."
+            className="w-full rounded-lg border border-[#1e1e2e] bg-[#111118] px-3 py-2 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-zinc-600"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && restoreUrl) handleRestoreConfirm();
+            }}
+          />
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                setRestoreOpen(false);
+                setRestoreUrl("");
+              }}
+              className="px-3 py-1.5 text-xs rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleRestoreConfirm}
+              disabled={!restoreUrl}
+              className="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </Dialog>
 
-			{/* Import from URL */}
-			<ImportWatchlistModal
-				externalPayload={restorePayload}
-				onExternalClose={clearRestorePayload}
-			/>
-		</div>
-	);
+      {/* Import from URL */}
+      <ImportWatchlistModal
+        externalPayload={restorePayload}
+        onExternalClose={clearRestorePayload}
+      />
+    </div>
+  );
 }
 
 function SidebarContent({
-	selectedTicker,
-	onSelect,
-	onOpenDetail,
-	onOpenIsins,
-	onOpenSettings,
-	onOpenAccount,
+  selectedTicker,
+  onSelect,
+  onOpenDetail,
+  onOpenIsins,
+  onOpenSettings,
+  onOpenAccount,
 }: {
-	selectedTicker: string | undefined;
-	onSelect: (ticker: string | undefined) => void;
-	onOpenDetail: (ticker: string) => void;
-	onOpenIsins: () => void;
-	onOpenSettings: () => void;
-	onOpenAccount: () => void;
+  selectedTicker: string | undefined;
+  onSelect: (ticker: string | undefined) => void;
+  onOpenDetail: (ticker: string) => void;
+  onOpenIsins: () => void;
+  onOpenSettings: () => void;
+  onOpenAccount: () => void;
 }) {
-	return (
-		<>
-			<div className="flex-1 overflow-y-auto overflow-x-hidden pt-2">
-				<WatchlistPanel
-					selectedTicker={selectedTicker}
-					onSelect={onSelect}
-					onOpenDetail={onOpenDetail}
-				/>
-			</div>
+  return (
+    <>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pt-2">
+        <WatchlistPanel
+          selectedTicker={selectedTicker}
+          onSelect={onSelect}
+          onOpenDetail={onOpenDetail}
+        />
+      </div>
 
-			<div className="border-t border-[#1e1e2e] shrink-0">
-				<TipsPanel />
-			</div>
-			<div className="border-t border-[#1e1e2e] shrink-0">
-				<HelpersPanel
-					onOpenIsins={onOpenIsins}
-					onOpenSettings={onOpenSettings}
-					onOpenAccount={onOpenAccount}
-				/>
-			</div>
-			<div className="">
-				<EventsPanel />
-			</div>
-			<div className="border-t border-[#1e1e2e] shrink-0">
-				<MarketHoursPanel />
-			</div>
-		</>
-	);
+      <div className="border-t border-[#1e1e2e] shrink-0">
+        <TipsPanel />
+      </div>
+      <div className="border-t border-[#1e1e2e] shrink-0">
+        <HelpersPanel
+          onOpenIsins={onOpenIsins}
+          onOpenSettings={onOpenSettings}
+          onOpenAccount={onOpenAccount}
+        />
+      </div>
+      <div className="">
+        <EventsPanel />
+      </div>
+      <div className="border-t border-[#1e1e2e] shrink-0">
+        <MarketHoursPanel />
+      </div>
+    </>
+  );
 }
 
 function AccountIconButton({ onClick }: { onClick: () => void }) {
-	const enabled = useAccountsEnabled();
-	if (enabled) return <AccountIconButtonWithAuth onClick={onClick} />;
-	return (
-		<button
-			type="button"
-			className="ml-1 p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
-			onClick={onClick}
-			aria-label="Account"
-		>
-			<User className="h-4 w-4" />
-		</button>
-	);
+  const enabled = useAccountsEnabled();
+  if (enabled) return <AccountIconButtonWithAuth onClick={onClick} />;
+  return (
+    <button
+      type="button"
+      className="ml-1 p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors flex gap-1"
+      onClick={onClick}
+      aria-label="Account"
+    >
+      <User className="h-4 w-4" />
+      <span className="hidden sm:inline">/</span>
+      <QrCodeIcon className="h-4 w-4 hidden sm:inline" />
+    </button>
+  );
 }
 
 function AccountIconButtonWithAuth({ onClick }: { onClick: () => void }) {
-	const { isSignedIn } = useUser();
-	return (
-		<button
-			type="button"
-			className={cn(
-				"ml-1 p-1 rounded hover:bg-zinc-800 transition-colors",
-				isSignedIn
-					? "text-emerald-500 hover:text-emerald-400"
-					: "text-zinc-400 hover:text-zinc-200",
-			)}
-			onClick={onClick}
-			aria-label="Account"
-		>
-			<User className="h-4 w-4" />
-		</button>
-	);
+  const { isSignedIn } = useUser();
+  return (
+    <button
+      type="button"
+      className={cn(
+        "ml-1 p-1 rounded hover:bg-zinc-800 transition-colors flex gap-1",
+        isSignedIn
+          ? "text-emerald-500 hover:text-emerald-400"
+          : "text-zinc-400 hover:text-zinc-200",
+      )}
+      onClick={onClick}
+      aria-label="Account"
+    >
+      <User className="h-4 w-4" />
+      <span className="hidden sm:inline">/</span>
+      <QrCodeIcon className="h-4 w-4 hidden sm:inline" />
+    </button>
+  );
 }
 
 function ExchangeStatusPills() {
-	const [now, setNow] = useState<Date | null>(null);
-	useEffect(() => {
-		setNow(new Date());
-		const interval = setInterval(() => setNow(new Date()), 60_000);
-		return () => clearInterval(interval);
-	}, []);
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+    const interval = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
-	if (!now) return null;
+  if (!now) return null;
 
-	return (
-		<>
-			{EXCHANGES.map((exchange) => {
-				const status = getExchangeStatus(exchange, now);
-				return (
-					<div
-						key={exchange.id}
-						className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] ${
-							status.isOpen ? "bg-emerald-500/10 text-emerald-400" : "bg-zinc-800 text-zinc-500"
-						}`}
-					>
-						<div
-							className={`h-1 w-1 rounded-full ${status.isOpen ? "bg-emerald-500" : "bg-zinc-600"}`}
-						/>
-						{exchange.name}
-					</div>
-				);
-			})}
-		</>
-	);
+  return (
+    <>
+      {EXCHANGES.map((exchange) => {
+        const status = getExchangeStatus(exchange, now);
+        return (
+          <div
+            key={exchange.id}
+            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] ${
+              status.isOpen
+                ? "bg-emerald-500/10 text-emerald-400"
+                : "bg-zinc-800 text-zinc-500"
+            }`}
+          >
+            <div
+              className={`h-1 w-1 rounded-full ${status.isOpen ? "bg-emerald-500" : "bg-zinc-600"}`}
+            />
+            {exchange.name}
+          </div>
+        );
+      })}
+    </>
+  );
 }

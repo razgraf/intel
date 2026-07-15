@@ -3,155 +3,202 @@
 import { getEffectiveIsins } from "@/entities/isins/model/helpers";
 import { useIsinsStore } from "@/entities/isins/model/store";
 import {
-	DEFAULT_WATCHLIST,
-	useWatchlistHydrated,
-	useWatchlistStore,
+  DEFAULT_WATCHLIST,
+  useWatchlistHydrated,
+  useWatchlistStore,
 } from "@/entities/watchlist/model/store";
 import type { WatchlistItem } from "@/entities/watchlist/model/types";
-import { fetchCloudWatchlist, pushCloudWatchlist } from "@/features/account/lib/sync";
+import {
+  clearSessionMarker,
+  hasSessionMarker,
+  markSessionActive,
+} from "@/features/account/lib/session-marker";
+import {
+  fetchCloudWatchlist,
+  pushCloudWatchlist,
+} from "@/features/account/lib/sync";
 import { MigrateLocalModal } from "@/features/account/ui/MigrateLocalModal";
 import { useAccountsEnabled } from "@/shared/lib/accounts-context";
-import { useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 const SYNC_DEBOUNCE_MS = 800;
 const RETRY_DELAY_MS = 2000;
 
 function stableStringify(items: unknown): string {
-	return JSON.stringify(items);
+  return JSON.stringify(items);
 }
 
 function isDefaultWatchlist(items: { ticker: string }[]): boolean {
-	return stableStringify(items) === stableStringify(DEFAULT_WATCHLIST);
+  return stableStringify(items) === stableStringify(DEFAULT_WATCHLIST);
 }
 
 function stripItemIsin(items: WatchlistItem[]): WatchlistItem[] {
-	return items.map(({ isin: _isin, ...rest }) => rest);
+  return items.map(({ isin: _isin, ...rest }) => rest);
 }
 
 function buildPushPayload(): {
-	items: WatchlistItem[];
-	isins: Record<string, string>;
+  items: WatchlistItem[];
+  isins: Record<string, string>;
 } {
-	const items = useWatchlistStore.getState().items;
-	const master = useIsinsStore.getState().isins;
-	return {
-		items: stripItemIsin(items),
-		isins: getEffectiveIsins(items, master),
-	};
+  const items = useWatchlistStore.getState().items;
+  const master = useIsinsStore.getState().isins;
+  return {
+    items: stripItemIsin(items),
+    isins: getEffectiveIsins(items, master),
+  };
 }
 
 export function CloudSyncProvider() {
-	const enabled = useAccountsEnabled();
-	if (!enabled) return null;
-	return <CloudSyncProviderInner />;
+  const enabled = useAccountsEnabled();
+  if (!enabled) return null;
+  return <CloudSyncProviderInner />;
 }
 
 function CloudSyncProviderInner() {
-	const { isLoaded, isSignedIn } = useUser();
-	const hydrated = useWatchlistHydrated();
-	const [migrateOpen, setMigrateOpen] = useState(false);
-	const lastSyncedRef = useRef<string | null>(null);
-	const wasSignedInRef = useRef<boolean | null>(null);
+  const { isLoaded, isSignedIn } = useUser();
+  const clerk = useClerk();
+  const hydrated = useWatchlistHydrated();
+  const [migrateOpen, setMigrateOpen] = useState(false);
+  const lastSyncedRef = useRef<string | null>(null);
+  const wasSignedInRef = useRef<boolean | null>(null);
+  const expiryNotifiedRef = useRef(false);
 
-	// Effect A: hydrate from cloud on sign-in; reset to defaults on sign-out.
-	useEffect(() => {
-		if (!isLoaded || !hydrated) return;
+  // Session-expiry notice: the marker survives explicit sign-out only if the
+  // session ended without user intent (expiry, revocation, cleared cookies).
+  useEffect(() => {
+    if (!isLoaded) return;
 
-		const prev = wasSignedInRef.current;
-		wasSignedInRef.current = isSignedIn ?? false;
+    if (isSignedIn) {
+      expiryNotifiedRef.current = false;
+      markSessionActive();
+      return;
+    }
 
-		// Sign-out transition: only act if we were previously signed in.
-		if (prev === true && !isSignedIn) {
-			useWatchlistStore.setState({ items: DEFAULT_WATCHLIST });
-			useIsinsStore.getState().replace({});
-			lastSyncedRef.current = null;
-			return;
-		}
+    if (!hasSessionMarker() || expiryNotifiedRef.current) return;
+    expiryNotifiedRef.current = true;
+    clearSessionMarker();
+    toast.warning("Your session has expired", {
+      description: "Your session expired after 7 days — please sign in again.",
+      duration: 10000,
+      classNames: { icon: "!text-yellow-400" },
+      action: {
+        label: "Sign in",
+        onClick: () => clerk.openSignIn(),
+      },
+      cancel: {
+        label: "Dismiss",
+        onClick: () => {},
+      },
+    });
+  }, [isLoaded, isSignedIn, clerk]);
 
-		if (!isSignedIn) return;
-		if (prev === true) return;
+  // Effect A: hydrate from cloud on sign-in; reset to defaults on sign-out.
+  useEffect(() => {
+    if (!isLoaded || !hydrated) return;
 
-		let cancelled = false;
-		(async () => {
-			try {
-				const cloud = await fetchCloudWatchlist();
-				if (cancelled) return;
+    const prev = wasSignedInRef.current;
+    wasSignedInRef.current = isSignedIn ?? false;
 
-				if (cloud.items === null) {
-					const local = useWatchlistStore.getState().items;
-					if (local.length === 0 || isDefaultWatchlist(local)) {
-						// Untouched / empty local: push silently, no prompt.
-						try {
-							const payload = buildPushPayload();
-							await pushCloudWatchlist(payload.items, payload.isins);
-							lastSyncedRef.current = stableStringify(payload);
-						} catch (err) {
-							console.warn("CloudSyncProvider: initial push failed", err);
-						}
-					} else {
-						setMigrateOpen(true);
-					}
-				} else {
-					// Cloud wins.
-					useWatchlistStore.setState({ items: cloud.items });
-					useIsinsStore.getState().replace(cloud.isins);
-					lastSyncedRef.current = stableStringify({
-						items: stripItemIsin(cloud.items),
-						isins: cloud.isins,
-					});
-				}
-			} catch (err) {
-				console.warn("CloudSyncProvider: hydration failed", err);
-			}
-		})();
+    // Sign-out transition: only act if we were previously signed in.
+    if (prev === true && !isSignedIn) {
+      useWatchlistStore.setState({ items: DEFAULT_WATCHLIST });
+      useIsinsStore.getState().replace({});
+      lastSyncedRef.current = null;
+      return;
+    }
 
-		return () => {
-			cancelled = true;
-		};
-	}, [isLoaded, isSignedIn, hydrated]);
+    if (!isSignedIn) return;
+    if (prev === true) return;
 
-	// Effect B: subscribe to BOTH stores; debounced push.
-	useEffect(() => {
-		if (!isSignedIn) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const cloud = await fetchCloudWatchlist();
+        if (cancelled) return;
 
-		let timeout: ReturnType<typeof setTimeout> | null = null;
+        if (cloud.items === null) {
+          const local = useWatchlistStore.getState().items;
+          if (local.length === 0 || isDefaultWatchlist(local)) {
+            // Untouched / empty local: push silently, no prompt.
+            try {
+              const payload = buildPushPayload();
+              await pushCloudWatchlist(payload.items, payload.isins);
+              lastSyncedRef.current = stableStringify(payload);
+            } catch (err) {
+              console.warn("CloudSyncProvider: initial push failed", err);
+            }
+          } else {
+            setMigrateOpen(true);
+          }
+        } else {
+          // Cloud wins.
+          useWatchlistStore.setState({ items: cloud.items });
+          useIsinsStore.getState().replace(cloud.isins);
+          lastSyncedRef.current = stableStringify({
+            items: stripItemIsin(cloud.items),
+            isins: cloud.isins,
+          });
+        }
+      } catch (err) {
+        console.warn("CloudSyncProvider: hydration failed", err);
+      }
+    })();
 
-		async function push(items: WatchlistItem[], isins: Record<string, string>, attempt = 1) {
-			try {
-				await pushCloudWatchlist(items, isins);
-				lastSyncedRef.current = stableStringify({ items, isins });
-			} catch (err) {
-				console.warn(`CloudSyncProvider: push attempt ${attempt} failed`, err);
-				if (attempt === 1) {
-					setTimeout(() => push(items, isins, 2), RETRY_DELAY_MS);
-				}
-			}
-		}
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, isSignedIn, hydrated]);
 
-		function scheduleSync() {
-			const payload = buildPushPayload();
-			const next = stableStringify(payload);
-			if (lastSyncedRef.current === next) return;
-			if (timeout) clearTimeout(timeout);
-			timeout = setTimeout(() => push(payload.items, payload.isins), SYNC_DEBOUNCE_MS);
-		}
+  // Effect B: subscribe to BOTH stores; debounced push.
+  useEffect(() => {
+    if (!isSignedIn) return;
 
-		const unsubItems = useWatchlistStore.subscribe((state, prev) => {
-			if (state.items === prev.items) return;
-			scheduleSync();
-		});
-		const unsubIsins = useIsinsStore.subscribe((state, prev) => {
-			if (state.isins === prev.isins) return;
-			scheduleSync();
-		});
+    let timeout: ReturnType<typeof setTimeout> | null = null;
 
-		return () => {
-			unsubItems();
-			unsubIsins();
-			if (timeout) clearTimeout(timeout);
-		};
-	}, [isSignedIn]);
+    async function push(
+      items: WatchlistItem[],
+      isins: Record<string, string>,
+      attempt = 1,
+    ) {
+      try {
+        await pushCloudWatchlist(items, isins);
+        lastSyncedRef.current = stableStringify({ items, isins });
+      } catch (err) {
+        console.warn(`CloudSyncProvider: push attempt ${attempt} failed`, err);
+        if (attempt === 1) {
+          setTimeout(() => push(items, isins, 2), RETRY_DELAY_MS);
+        }
+      }
+    }
 
-	return <MigrateLocalModal open={migrateOpen} />;
+    function scheduleSync() {
+      const payload = buildPushPayload();
+      const next = stableStringify(payload);
+      if (lastSyncedRef.current === next) return;
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(
+        () => push(payload.items, payload.isins),
+        SYNC_DEBOUNCE_MS,
+      );
+    }
+
+    const unsubItems = useWatchlistStore.subscribe((state, prev) => {
+      if (state.items === prev.items) return;
+      scheduleSync();
+    });
+    const unsubIsins = useIsinsStore.subscribe((state, prev) => {
+      if (state.isins === prev.isins) return;
+      scheduleSync();
+    });
+
+    return () => {
+      unsubItems();
+      unsubIsins();
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [isSignedIn]);
+
+  return <MigrateLocalModal open={migrateOpen} />;
 }
