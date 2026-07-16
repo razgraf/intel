@@ -8,14 +8,19 @@ import { Toaster } from "@/shared/ui/Toaster";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import type { Metadata } from "next";
-import { Geist, Inter } from "next/font/google";
+import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
-const inter = Inter({
-	subsets: ["latin"],
+const inter = localFont({
+	src: [
+		{ path: "./fonts/InterVariable.woff2", style: "normal" },
+		{ path: "./fonts/InterVariable-Italic.woff2", style: "italic" },
+	],
+	weight: "100 900",
 	display: "swap",
 	variable: "--font-inter",
 });
